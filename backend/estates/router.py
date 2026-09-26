@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from backend.database import get_db
 from backend.models import User, Estate, EstateMember
 from backend.schemas import EstateCreate, EstateResponse, EstateMemberCreate, EstateMemberResponse
-from backend.auth.dependencies import get_current_user, require_owner
+from backend.auth.dependencies import get_current_user, require_owner, require_estate_access
 
 router = APIRouter(prefix="/estates", tags=["estates"])
 
@@ -100,6 +100,44 @@ def revoke_member(id: UUID, user_id: UUID, db: Session = Depends(get_db), member
     if not target_membership:
         raise HTTPException(status_code=404, detail="Active membership not found")
     
-    target_membership.access_revoked_at = datetime.now(timezone.utc)
-    db.commit()
-    return None
+from backend.models import User, Estate, EstateMember, Asset, Document
+
+@router.get("/{estate_id}/estate-map")
+def get_estate_map(estate_id: UUID, db: Session = Depends(get_db), membership: EstateMember = Depends(require_estate_access)):
+    estate = db.query(Estate).filter(Estate.id == estate_id).first()
+    assets = db.query(Asset).filter(Asset.estate_id == estate_id).all()
+    
+    total_val = sum([float(a.estimated_value) for a in assets if a.estimated_value])
+    
+    actions_pending = len(assets) # simplified logic
+    
+    # Mask account numbers
+    masked_assets = []
+    for a in assets:
+        ref = a.reference_number
+        if ref and len(ref) > 4:
+            ref = "XXXX" + ref[-4:]
+        
+        masked_assets.append({
+            "id": str(a.id),
+            "category": a.category,
+            "institution_name": a.institution_name,
+            "urgency": a.urgency,
+            "status": a.status,
+            "next_step_text": a.next_step_text,
+            "estimated_value": a.estimated_value,
+            "reference_number": ref
+        })
+
+    return {
+        "estate_id": str(estate_id),
+        "deceased_name": estate.deceased_name,
+        "summary": {
+            "assets_found": len(assets),
+            "critical_tasks_remaining": actions_pending,
+            "estimated_total_value": total_val,
+            "avg_claim_timeline_days": 30
+        },
+        "assets": masked_assets,
+        "generated_at": datetime.now(timezone.utc).isoformat()
+    }

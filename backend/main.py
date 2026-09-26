@@ -13,8 +13,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from backend.documents.router import router as documents_router
+
 app.include_router(auth_router)
 app.include_router(estates_router)
+app.include_router(documents_router)
 
 @app.get("/health")
 def health_check():

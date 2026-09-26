@@ -40,3 +40,41 @@ class EstateMember(Base):
     __table_args__ = (
         Index("idx_active_member", "estate_id", "user_id", postgresql_where=text("access_revoked_at IS NULL")),
     )
+
+class Asset(Base):
+    __tablename__ = "assets"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()"))
+    estate_id = Column(UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE"))
+    category = Column(String, nullable=False)
+    institution_name = Column(String, nullable=True)
+    reference_number = Column(String, nullable=True)
+    estimated_value = Column(String, nullable=True) # or Numeric. Kept as string to avoid schema issues, will parse in python
+    urgency = Column(String, nullable=True)
+    claim_deadline = Column(String, nullable=True)
+    status = Column(String, default="discovered")
+    next_step_text = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+class Document(Base):
+    __tablename__ = "documents"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()"))
+    estate_id = Column(UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE"))
+    asset_id = Column(UUID(as_uuid=True), ForeignKey("assets.id", ondelete="SET NULL"), nullable=True)
+    uploaded_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    doc_type = Column(String, nullable=True)
+    s3_key = Column(String, nullable=False)
+    file_name_original = Column(String, nullable=True)
+    mime_type = Column(String, nullable=True)
+    size_bytes = Column(String, nullable=True)
+    ocr_extracted_json = Column(String, nullable=True)
+    uploaded_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+class RequiredDocument(Base):
+    __tablename__ = "required_documents"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()"))
+    asset_id = Column(UUID(as_uuid=True), ForeignKey("assets.id", ondelete="CASCADE"))
+    doc_type = Column(String, nullable=False)
+    is_satisfied = Column(String, default="false")
+    satisfied_by_document_id = Column(UUID(as_uuid=True), ForeignKey("documents.id"), nullable=True)
+

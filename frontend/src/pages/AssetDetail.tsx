@@ -46,11 +46,11 @@ export const AssetDetail: React.FC = () => {
     }
   };
 
-  const handleCompleteReq = async (reqId: string) => {
-    await completeRequirement(asset.id, reqId);
+  const handleCompleteReq = async (reqId: string, currentStatus: boolean) => {
+    await completeRequirement(asset.id, reqId, !currentStatus);
     setAsset({
       ...asset,
-      requirements: asset.requirements.map(r => r.id === reqId ? { ...r, completed: true } : r)
+      requirements: asset.requirements.map(r => r.id === reqId ? { ...r, completed: !currentStatus } : r)
     });
   };
 
@@ -91,7 +91,7 @@ export const AssetDetail: React.FC = () => {
               {asset.requirements.map(req => (
                 <li key={req.id} className="flex items-center gap-3">
                   <button 
-                    onClick={() => handleCompleteReq(req.id)}
+                    onClick={() => handleCompleteReq(req.id, req.completed)}
                     className="mt-0.5 shrink-0 hover:opacity-80 transition-opacity"
                   >
                     {req.completed ? (
@@ -125,7 +125,35 @@ export const AssetDetail: React.FC = () => {
             )}
             {asset.requirements.some(r => !r.completed) && (
               <div className="p-4 bg-slate-50">
-                <Button variant="outline" className="w-full" onClick={() => navigate('/upload')}>
+                <input 
+                  type="file" 
+                  id="inline-upload" 
+                  className="hidden" 
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      try {
+                        // We can reuse the uploadDocument API function, but since it's an MVP,
+                        // we'll just simulate adding it to the local asset's document list for the UI.
+                        setAsset({
+                          ...asset,
+                          documents: [...asset.documents, { id: Math.random().toString(), name: file.name, status: 'Uploaded' }]
+                        });
+                        // Also hit the real endpoint in the background
+                        const { uploadDocument } = await import('../services/api');
+                        await uploadDocument(file);
+                      } catch (err) {
+                        console.error('Upload failed', err);
+                        alert('Upload failed. Possible duplicate document?');
+                      }
+                    }
+                  }} 
+                />
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => document.getElementById('inline-upload')?.click()}
+                >
                   Upload missing document
                 </Button>
               </div>
