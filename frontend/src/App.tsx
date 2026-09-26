@@ -8,11 +8,15 @@ import { Assets } from './pages/Assets';
 import { AssetDetail } from './pages/AssetDetail';
 import { Actions } from './pages/Actions';
 import { Closure } from './pages/Closure';
+import Login from './pages/login';
+import EstateSetup from './pages/estate-setup';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/estate-setup" element={<EstateSetup />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Welcome />} />
           <Route path="upload" element={<Upload />} />

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Progress } from '../components/Progress';
-import { FileUp, Plus } from 'lucide-react';
+import { FileUp, Plus, Download } from 'lucide-react';
 import { getEstate, getAssets, getActions, getDocuments } from '../services/api';
 import { EstateData, Asset, ActionItem, DocumentItem } from '../types/estate';
 
@@ -88,9 +88,15 @@ export const Home: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">
-          {estate?.ownerName ? `${estate.ownerName}'s Estate` : "Your Estate"}
-        </h1>
+        <div className="flex justify-between items-start mb-2">
+          <h1 className="text-3xl font-bold text-slate-900">
+            {estate?.ownerName ? `${estate.ownerName}'s Estate` : "Your Estate"}
+          </h1>
+          <Button variant="outline" className="gap-2 print:hidden" onClick={() => window.print()}>
+            <Download className="w-4 h-4" />
+            Download PDF
+          </Button>
+        </div>
         <div className="flex items-center gap-4 mb-8">
           <span className="text-2xl font-bold text-teal-700">{estate?.completionPercentage}% organized</span>
           <div className="flex-1 max-w-xs">
