@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { UploadCloud } from 'lucide-react';
 import clsx from 'clsx';
 
 interface UploadBoxProps {
@@ -41,8 +40,8 @@ export const UploadBox: React.FC<UploadBoxProps> = ({ onFilesSelected, className
       className={clsx(
         'relative border-2 border-dashed rounded-2xl p-12 text-center transition-colors',
         isDragging 
-          ? 'border-teal-500 bg-teal-50' 
-          : 'border-slate-300 hover:border-teal-400 hover:bg-slate-50',
+          ? 'border-primary-container bg-surface-container' 
+          : 'border-outline/30 hover:border-primary-container hover:bg-background',
         className
       )}
       onDragEnter={handleDrag}
@@ -59,13 +58,13 @@ export const UploadBox: React.FC<UploadBoxProps> = ({ onFilesSelected, className
         title="Upload documents"
       />
       <div className="flex flex-col items-center pointer-events-none">
-        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-          <UploadCloud className="w-8 h-8 text-teal-600" />
+        <div className="w-16 h-16 bg-surface-container-lowest rounded-full flex items-center justify-center shadow-sm mb-4">
+          <span className="material-symbols-outlined text-[32px] text-primary">cloud_upload</span>
         </div>
-        <h3 className="text-xl font-semibold text-slate-900 mb-2">
+        <h3 className="text-xl font-semibold text-primary mb-2">
           Click to upload or drag and drop
         </h3>
-        <p className="text-slate-500">
+        <p className="text-outline">
           Supported formats: PDF, JPG, PNG
         </p>
       </div>

@@ -1,10 +1,4 @@
 import React from 'react';
-<<<<<<< HEAD
-import { Bell } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-export const Topbar: React.FC = () => {
-=======
 import { Bell, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -27,7 +21,6 @@ export const Topbar: React.FC = () => {
     navigate('/login');
   };
 
->>>>>>> chondu
   return (
     <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
       <div className="flex items-center gap-2">
@@ -40,11 +33,6 @@ export const Topbar: React.FC = () => {
           Estate<span className="text-teal-700">Clear</span>
         </Link>
       </div>
-<<<<<<< HEAD
-      <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors">
-        <Bell className="w-5 h-5" />
-      </button>
-=======
       <div className="flex items-center gap-2">
         <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors">
           <Bell className="w-5 h-5" />
@@ -54,7 +42,6 @@ export const Topbar: React.FC = () => {
           <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
->>>>>>> chondu
     </header>
   );
 };

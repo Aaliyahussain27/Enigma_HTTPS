@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Status } from '../components/Status';
-import { ArrowLeft, Check, Circle } from 'lucide-react';
 import { explainDocument, getAssetById, updateActionStatus, completeRequirement, uploadDocument, DocumentExplanation } from '../services/api';
 import { Asset } from '../types/estate';
 
@@ -26,7 +25,7 @@ export const AssetDetail: React.FC = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+    return <div className="p-8 text-center text-outline">Loading...</div>;
   }
 
   if (!asset) {
@@ -72,34 +71,34 @@ export const AssetDetail: React.FC = () => {
     <div className="max-w-3xl mx-auto pb-12">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-8 transition-colors font-medium"
+        className="flex items-center gap-2 text-outline hover:text-primary mb-8 transition-colors font-medium"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <span className="material-symbols-outlined">arrow_back</span>
         Back
       </button>
 
       <div className="mb-10">
-        <h1 className="text-4xl font-bold text-slate-900 mb-4">{asset.provider}</h1>
+        <h1 className="text-4xl font-bold text-primary mb-4">{asset.provider}</h1>
         <div className="flex items-center gap-4">
           <Status status={asset.status} />
-          <span className="text-xl font-bold text-slate-900">{formatCurrency(asset.amount)}</span>
+          <span className="text-xl font-bold text-primary">{formatCurrency(asset.amount)}</span>
         </div>
       </div>
 
       <div className="space-y-8">
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-4">What we know</h2>
+          <h2 className="text-xl font-bold text-primary mb-4">What we know</h2>
           <Card className="p-6">
             <ul className="space-y-4">
               {asset.knowledge.map((k, i) => (
-                <li key={i} className="text-slate-700 text-lg">{k}</li>
+                <li key={i} className="text-primary text-lg">{k}</li>
               ))}
             </ul>
           </Card>
         </section>
 
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-4">What you need</h2>
+          <h2 className="text-xl font-bold text-primary mb-4">What you need</h2>
           <Card className="p-6">
             <ul className="space-y-4">
               {asset.requirements.map(req => (
@@ -109,12 +108,12 @@ export const AssetDetail: React.FC = () => {
                     className="mt-0.5 shrink-0 hover:opacity-80 transition-opacity"
                   >
                     {req.completed ? (
-                      <Check className="w-6 h-6 text-teal-600" />
+                      <span className="material-symbols-outlined text-primary">check</span>
                     ) : (
-                      <Circle className="w-6 h-6 text-slate-300" />
+                      <span className="material-symbols-outlined text-[24px] text-outline">radio_button_unchecked</span>
                     )}
                   </button>
-                  <span className={`text-lg ${req.completed ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
+                  <span className={`text-lg ${req.completed ? 'text-outline line-through' : 'text-primary'}`}>
                     {req.name}
                   </span>
                 </li>
@@ -124,21 +123,21 @@ export const AssetDetail: React.FC = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Documents</h2>
-          <Card className="divide-y divide-slate-100">
+          <h2 className="text-xl font-bold text-primary mb-4">Documents</h2>
+          <Card className="divide-y divide-outline/20">
             {asset.documents.length > 0 ? asset.documents.map(doc => (
               <div key={doc.id} className="p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <Check className="w-5 h-5 text-teal-600 shrink-0" />
-                    <span className="font-medium text-slate-900 truncate">{doc.name}</span>
+                    <span className="material-symbols-outlined text-primary shrink-0">check</span>
+                    <span className="font-medium text-primary truncate">{doc.name}</span>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => handleExplain(doc.id)} disabled={explaining === doc.id}>
                     {explaining === doc.id ? 'Explaining...' : 'Explain'}
                   </Button>
                 </div>
                 {explanation?.id === doc.id && (
-                  <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 space-y-2">
+                  <div className="mt-4 rounded-xl bg-background p-4 text-sm text-primary space-y-2">
                     <p><strong>What it is:</strong> {explanation.data.what_it_is}</p>
                     <p><strong>What we found:</strong> {explanation.data.what_we_found.join(', ')}</p>
                     <p><strong>What is missing:</strong> {explanation.data.what_is_missing}</p>
@@ -147,10 +146,10 @@ export const AssetDetail: React.FC = () => {
                 )}
               </div>
             )) : (
-              <div className="p-4 text-slate-500">No documents found for this asset.</div>
+              <div className="p-4 text-outline">No documents found for this asset.</div>
             )}
             {asset.requirements.some(r => !r.completed) && (
-              <div className="p-4 bg-slate-50">
+              <div className="p-4 bg-background">
                 <input 
                   type="file" 
                   id="inline-upload" 
@@ -178,7 +177,7 @@ export const AssetDetail: React.FC = () => {
                 </Button>
               </div>
             )}
-            {uploadError && <p className="px-4 pb-4 text-sm text-red-600">{uploadError}</p>}
+            {uploadError && <p className="px-4 pb-4 text-sm text-error">{uploadError}</p>}
           </Card>
         </section>
       </div>

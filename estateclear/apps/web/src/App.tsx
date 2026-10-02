@@ -9,6 +9,7 @@ import { AssetDetail } from './pages/AssetDetail';
 import { Actions } from './pages/Actions';
 import { Closure } from './pages/Closure';
 import { Documents } from './pages/Documents';
+import { CategoryBrowser } from './pages/AssetMap/CategoryBrowser';
 import Login from './pages/login';
 import EstateSetup from './pages/estate-setup';
 
@@ -53,6 +54,7 @@ function App() {
               <Route path="/" element={<RootRedirect />} />
               <Route path="/welcome" element={<Welcome />} />
               <Route path="/upload" element={<Upload />} />
+              <Route path="/asset-map" element={<CategoryBrowser />} />
               <Route path="/processing" element={<Processing />} />
               <Route path="/home" element={<Home />} />
               <Route path="/assets" element={<Assets />} />

@@ -12,7 +12,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={twMerge(
-          'bg-white rounded-2xl border border-slate-200 overflow-hidden',
+          'bg-surface-container-lowest rounded-2xl border border-outline/20 overflow-hidden',
           hoverable && 'transition-shadow hover:shadow-md cursor-pointer',
           className
         )}

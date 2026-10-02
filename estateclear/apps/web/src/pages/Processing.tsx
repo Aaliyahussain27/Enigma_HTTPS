@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
-import { CheckCircle2, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 
 const steps = [
@@ -42,11 +41,11 @@ export const Processing: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto pt-12 flex flex-col items-center">
-      <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-8 relative">
-        <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+      <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-8 relative">
+        <span className="material-symbols-outlined text-[32px] text-primary animate-spin">progress_activity</span>
       </div>
       
-      <h1 className="text-3xl font-bold text-slate-900 mb-12">
+      <h1 className="text-3xl font-bold text-primary mb-12">
         Organizing your information...
       </h1>
 
@@ -61,20 +60,20 @@ export const Processing: React.FC = () => {
               key={index} 
               className={clsx(
                 "p-4 flex items-center gap-4 transition-all duration-500",
-                isActive ? "border-teal-200 bg-teal-50/50 shadow-sm" : "border-transparent bg-transparent",
+                isActive ? "border-primary/20 bg-surface-container/50 shadow-sm" : "border-transparent bg-transparent",
                 isUpcoming ? "opacity-40" : "opacity-100"
               )}
             >
               {isCompleted ? (
-                <CheckCircle2 className="w-6 h-6 text-teal-600 shrink-0" />
+                <span className="material-symbols-outlined text-primary shrink-0">check_circle</span>
               ) : isActive ? (
-                <Loader2 className="w-6 h-6 text-teal-600 animate-spin shrink-0" />
+                <span className="material-symbols-outlined text-[24px] text-primary animate-spin shrink-0">progress_activity</span>
               ) : (
-                <div className="w-6 h-6 rounded-full border-2 border-slate-300 shrink-0" />
+                <div className="w-6 h-6 rounded-full border-2 border-outline/30 shrink-0" />
               )}
               <span className={clsx(
                 "font-medium text-lg",
-                isCompleted || isActive ? "text-slate-900" : "text-slate-500"
+                isCompleted || isActive ? "text-primary" : "text-outline"
               )}>
                 {step}
               </span>

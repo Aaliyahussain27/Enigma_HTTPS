@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
-import { Plus, ArrowRight } from 'lucide-react';
 
 export default function EstateSetup() {
   const [estates, setEstates] = useState<any[]>([]);
@@ -38,7 +37,7 @@ export default function EstateSetup() {
 
   const selectEstate = (estateId: string) => {
     localStorage.setItem('current_estate_id', estateId);
-    navigate('/upload');
+    navigate('/asset-map');
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -69,7 +68,7 @@ export default function EstateSetup() {
 
       const data = await res.json();
       localStorage.setItem('current_estate_id', data.id);
-      navigate('/upload');
+      navigate('/asset-map');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,49 +76,49 @@ export default function EstateSetup() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Loading...</div>;
+  if (loading) return <div className="p-8 text-center text-outline">Loading...</div>;
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-gray-50 p-4">
+    <div className="flex min-h-[80vh] items-center justify-center bg-background p-4">
       <div className="w-full max-w-lg">
-        <h1 className="text-3xl font-bold text-slate-900 mb-8 text-center">Select Your Estate</h1>
+        <h1 className="text-3xl font-bold text-primary mb-8 text-center">Select Your Estate</h1>
         
         {!showCreate && (
           <div className="space-y-4 mb-8">
-            <h2 className="text-lg font-medium text-slate-700">Existing Estates</h2>
+            <h2 className="text-lg font-medium text-primary">Existing Estates</h2>
             {estates.map(estate => (
-              <Card key={estate.id} className="p-5 flex items-center justify-between hover:border-teal-500 cursor-pointer transition-colors" onClick={() => selectEstate(estate.id)}>
+              <Card key={estate.id} className="p-5 flex items-center justify-between hover:border-primary-container cursor-pointer transition-colors" onClick={() => selectEstate(estate.id)}>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg">{estate.deceased_name || 'Unnamed Estate'}</h3>
-                  <p className="text-sm text-slate-500 capitalize">Role: {estate.role}</p>
+                  <h3 className="font-bold text-primary text-lg">{estate.deceased_name || 'Unnamed Estate'}</h3>
+                  <p className="text-sm text-outline capitalize">Role: {estate.role}</p>
                 </div>
-                <div className="flex items-center text-teal-700 font-medium">
-                  Continue <ArrowRight className="w-5 h-5 ml-2" />
+                <div className="flex items-center text-primary-container font-medium">
+                  Continue <span className="material-symbols-outlined ml-2">arrow_forward</span>
                 </div>
               </Card>
             ))}
             
             <Button variant="outline" className="w-full mt-6 py-6 border-dashed" onClick={() => setShowCreate(true)}>
-              <Plus className="w-5 h-5 mr-2" /> Create New Estate
+              <span className="material-symbols-outlined mr-2">add</span> Create New Estate
             </Button>
           </div>
         )}
 
         {showCreate && (
-          <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+          <div className="bg-surface-container-lowest p-8 rounded-lg shadow-sm border border-outline/20">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Create New Estate</h2>
+              <h2 className="text-2xl font-bold text-primary">Create New Estate</h2>
               {estates.length > 0 && (
-                <button type="button" onClick={() => setShowCreate(false)} className="text-sm text-slate-500 hover:text-slate-900">Cancel</button>
+                <button type="button" onClick={() => setShowCreate(false)} className="text-sm text-outline hover:text-primary">Cancel</button>
               )}
             </div>
-            {error && <div className="mb-4 text-sm text-red-600 text-center">{error}</div>}
+            {error && <div className="mb-4 text-sm text-error text-center">{error}</div>}
             <form onSubmit={handleCreate} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Deceased Person's Name</label>
-                <input required type="text" value={deceasedName} onChange={(e) => setDeceasedName(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-teal-500 focus:ring-teal-500" placeholder="e.g. John Doe" />
+                <label className="block text-sm font-medium text-primary mb-2">Deceased Person's Name</label>
+                <input required type="text" value={deceasedName} onChange={(e) => setDeceasedName(e.target.value)} className="mt-1 block w-full rounded-md border border-outline/30 shadow-sm p-3 focus:border-primary-container focus:ring-primary" placeholder="e.g. John Doe" />
               </div>
-              <button type="submit" disabled={creating} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 transition-colors">
+              <button type="submit" disabled={creating} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-on-primary bg-primary-container hover:bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors">
                 {creating ? 'Setting up...' : 'Create Estate'}
               </button>
             </form>

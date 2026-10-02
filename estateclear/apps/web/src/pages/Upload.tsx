@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { UploadBox } from '../components/UploadBox';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { FileText, X } from 'lucide-react';
 import { uploadDocument } from '../services/api';
+import { assetCategories } from './AssetMap/CategoryBrowser';
 
 export const Upload: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const selectedCategory = assetCategories.find(({ id }) => id === searchParams.get('category'));
 
   const handleFilesSelected = (newFiles: File[]) => {
     setFiles((prev) => [...prev, ...newFiles]);
@@ -35,37 +37,39 @@ export const Upload: React.FC = () => {
     }
   };
 
+  if (!selectedCategory) return <Navigate to="/asset-map" replace />;
+
   return (
     <div className="max-w-2xl mx-auto pt-8">
-      <h1 className="text-3xl font-bold text-slate-900 mb-2">Upload documents</h1>
-      <p className="text-lg text-slate-600 mb-8">
-        Add bank statements, insurance policies, or any other financial documents.
+      <h1 className="text-3xl font-bold text-primary mb-2">Upload {selectedCategory.name}</h1>
+      <p className="text-lg text-outline mb-8">
+        Add documents related to {selectedCategory.name.toLowerCase()}.
       </p>
 
       <UploadBox onFilesSelected={handleFilesSelected} className="mb-8" />
 
       {files.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-sm font-medium text-slate-900 mb-4 uppercase tracking-wider">
+          <h3 className="text-sm font-medium text-primary mb-4 uppercase tracking-wider">
             Ready to process ({files.length})
           </h3>
           <div className="space-y-3">
             {files.map((file, i) => (
-              <Card key={i} className="p-4 flex items-center justify-between bg-slate-50 border-transparent">
+              <Card key={i} className="p-4 flex items-center justify-between bg-background border-transparent">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="p-2 bg-white rounded-lg">
-                    <FileText className="w-5 h-5 text-teal-700" />
+                  <div className="p-2 bg-surface-container-lowest rounded-lg">
+                    <span className="material-symbols-outlined text-primary-container">description</span>
                   </div>
-                  <span className="font-medium text-slate-900 truncate">
+                  <span className="font-medium text-primary truncate">
                     {file.name}
                   </span>
                 </div>
                 <button 
                   onClick={() => removeFile(i)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+                  className="p-2 text-outline hover:text-outline rounded-full hover:bg-surface-container transition-colors"
                   disabled={isUploading}
                 >
-                  <X className="w-5 h-5" />
+                  <span className="material-symbols-outlined">close</span>
                 </button>
               </Card>
             ))}

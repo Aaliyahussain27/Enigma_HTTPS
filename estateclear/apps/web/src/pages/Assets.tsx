@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { Plus } from 'lucide-react';
 import { getAssets } from '../services/api';
 import { Asset } from '../types/estate';
 
@@ -19,21 +18,21 @@ export const Assets: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+    return <div className="p-8 text-center text-outline">Loading...</div>;
   }
 
   if (assets.length === 0) {
     return (
       <div className="max-w-3xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Assets</h1>
-          <p className="text-xl text-slate-500 font-medium">No assets added yet</p>
+          <h1 className="text-3xl font-bold text-primary mb-2">Assets</h1>
+          <p className="text-xl text-outline font-medium">No assets added yet</p>
         </div>
 
-        <Card className="p-8 text-center bg-slate-50 border-dashed border-2">
-          <p className="text-slate-600 mb-6 text-lg">Your financial assets will appear here once you add them.</p>
+        <Card className="p-8 text-center bg-background border-dashed border-2">
+          <p className="text-outline mb-6 text-lg">Your financial assets will appear here once you add them.</p>
           <Button className="gap-2">
-            <Plus className="w-5 h-5" />
+            <span className="material-symbols-outlined">add</span>
             Add an asset
           </Button>
         </Card>
@@ -50,9 +49,9 @@ export const Assets: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">Assets</h1>
+        <h1 className="text-3xl font-bold text-primary">Assets</h1>
         <Button variant="outline" className="gap-2 h-10 px-4">
-          <Plus className="w-4 h-4" />
+          <span className="material-symbols-outlined">add</span>
           Add asset
         </Button>
       </div>
@@ -66,12 +65,12 @@ export const Assets: React.FC = () => {
             className="p-5 flex items-center justify-between group"
           >
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">{asset.category}</p>
-              <h3 className="font-bold text-slate-900 text-lg">{asset.provider}</h3>
+              <p className="text-sm font-medium text-outline mb-1">{asset.category}</p>
+              <h3 className="font-bold text-primary text-lg">{asset.provider}</h3>
             </div>
             <div className="text-right">
-              <p className="font-bold text-slate-900 text-xl">{formatCurrency(asset.amount)}</p>
-              <p className="text-sm font-medium text-slate-500">{asset.status}</p>
+              <p className="font-bold text-primary text-xl">{formatCurrency(asset.amount)}</p>
+              <p className="text-sm font-medium text-outline">{asset.status}</p>
             </div>
           </Card>
         ))}

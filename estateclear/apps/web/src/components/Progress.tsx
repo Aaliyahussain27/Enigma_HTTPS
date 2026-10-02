@@ -10,9 +10,9 @@ export const Progress: React.FC<ProgressProps> = ({ value, className }) => {
   const percentage = Math.max(0, Math.min(100, value));
 
   return (
-    <div className={clsx('w-full h-3 bg-slate-100 rounded-full overflow-hidden', className)}>
+    <div className={clsx('w-full h-3 bg-surface-container-low rounded-full overflow-hidden', className)}>
       <div 
-        className="h-full bg-teal-600 rounded-full transition-all duration-500 ease-out"
+        className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
         style={{ width: `${percentage}%` }}
       />
     </div>

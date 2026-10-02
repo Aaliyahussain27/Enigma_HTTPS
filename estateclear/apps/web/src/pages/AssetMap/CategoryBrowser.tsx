@@ -2,15 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/Card';
 
+export const assetCategories = [
+  { id: 'insurance', name: 'Insurance Policies', icon: 'health_and_safety' },
+  { id: 'bank', name: 'Bank Accounts', icon: 'account_balance' },
+  { id: 'loan', name: 'Loans & Mortgages', icon: 'real_estate_agent' },
+  { id: 'epf', name: 'EPF / Provident Fund', icon: 'savings' },
+];
+
 export const CategoryBrowser: React.FC = () => {
   const navigate = useNavigate();
-
-  const categories = [
-    { id: 'insurance', name: 'Insurance Policies', icon: 'health_and_safety' },
-    { id: 'bank', name: 'Bank Accounts', icon: 'account_balance' },
-    { id: 'loan', name: 'Loans & Mortgages', icon: 'real_estate_agent' },
-    { id: 'epf', name: 'EPF / Provident Fund', icon: 'savings' },
-  ];
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
@@ -18,7 +18,7 @@ export const CategoryBrowser: React.FC = () => {
       <p className="text-outline mb-8">Select a category to begin uploading related documents.</p>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {categories.map(cat => (
+        {assetCategories.map(cat => (
           <Card 
             key={cat.id} 
             hoverable 

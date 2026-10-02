@@ -26,7 +26,7 @@ export const Closure: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+    return <div className="p-8 text-center text-outline">Loading...</div>;
   }
 
   const isReady = estate?.ready === true;
@@ -87,17 +87,17 @@ export const Closure: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto pt-8 text-center">
-      <h1 className="text-3xl font-bold text-slate-900 mb-4">
+      <h1 className="text-3xl font-bold text-primary mb-4">
         {isReady ? 'Estate ready to close' : 'Estate not ready to close'}
       </h1>
       
       <Card className="p-8 mt-8">
-        <p className="text-lg text-slate-600 mb-8">
+        <p className="text-lg text-outline mb-8">
           {isReady 
             ? "You have completed all necessary actions to settle this estate." 
             : `Complete ${estate?.pending_actions || 0} actions and ${estate?.pending_documents || 0} required documents before closing this estate.`}
         </p>
-        {error && <p className="mb-6 text-sm text-red-600">{error}</p>}
+        {error && <p className="mb-6 text-sm text-error">{error}</p>}
 
         {isReady ? (
           <Button className="w-full" onClick={handleClose} disabled={closing || estate?.status === 'closed'}>
@@ -111,14 +111,14 @@ export const Closure: React.FC = () => {
       </Card>
 
       <Card className="p-8 mt-8 text-left border-amber-200">
-        <h2 className="text-xl font-bold text-slate-900">Delete estate data</h2>
-        <p className="text-slate-600 mt-2">This permanently removes the estate's documents, assets, requirements, and memberships. Type DELETE to confirm.</p>
+        <h2 className="text-xl font-bold text-primary">Delete estate data</h2>
+        <p className="text-outline mt-2">This permanently removes the estate's documents, assets, requirements, and memberships. Type DELETE to confirm.</p>
         <div className="mt-6 space-y-4">
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-primary">
             Deletion date
-            <input type="date" min={scheduledFor} value={scheduledFor} onChange={event => setScheduledFor(event.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 p-3" disabled={deletionBusy} />
+            <input type="date" min={scheduledFor} value={scheduledFor} onChange={event => setScheduledFor(event.target.value)} className="mt-1 block w-full rounded-xl border border-outline/20 p-3" disabled={deletionBusy} />
           </label>
-          <input value={confirmText} onChange={event => setConfirmText(event.target.value)} placeholder="Type DELETE" className="block w-full rounded-xl border border-slate-200 p-3" disabled={deletionBusy} />
+          <input value={confirmText} onChange={event => setConfirmText(event.target.value)} placeholder="Type DELETE" className="block w-full rounded-xl border border-outline/20 p-3" disabled={deletionBusy} />
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSchedule} disabled={deletionBusy || confirmText !== 'DELETE'}>
               {estate?.schedule ? 'Reschedule deletion' : 'Schedule deletion'}

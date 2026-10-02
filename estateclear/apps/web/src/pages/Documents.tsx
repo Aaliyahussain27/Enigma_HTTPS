@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Upload as UploadIcon } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { explainDocument, getDocuments, DocumentExplanation } from '../services/api';
@@ -30,29 +29,29 @@ export const Documents: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Loading...</div>;
+  if (loading) return <div className="p-8 text-center text-outline">Loading...</div>;
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Documents</h1>
-          <p className="text-lg text-slate-600">Every uploaded document, linked to the estate information it supports.</p>
+          <h1 className="text-3xl font-bold text-primary mb-2">Documents</h1>
+          <p className="text-lg text-outline">Every uploaded document, linked to the estate information it supports.</p>
         </div>
-        <Button onClick={() => navigate('/upload')} className="gap-2 shrink-0">
-          <UploadIcon className="h-4 w-4" />
+        <Button onClick={() => navigate('/asset-map')} className="gap-2 shrink-0">
+          <span className="material-symbols-outlined text-[16px]">upload</span>
           Upload
         </Button>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {documents.length === 0 ? (
         <Card className="p-10 text-center border-dashed border-2">
-          <FileText className="mx-auto h-10 w-10 text-slate-300 mb-4" />
-          <p className="text-lg font-medium text-slate-900">No documents uploaded yet</p>
-          <p className="text-slate-600 mt-2 mb-6">Upload statements, policies, or other estate records to begin.</p>
-          <Button onClick={() => navigate('/upload')}>Upload a document</Button>
+          <span className="material-symbols-outlined mx-auto text-outline mb-4">description</span>
+          <p className="text-lg font-medium text-primary">No documents uploaded yet</p>
+          <p className="text-outline mt-2 mb-6">Upload statements, policies, or other estate records to begin.</p>
+          <Button onClick={() => navigate('/asset-map')}>Upload a document</Button>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -60,12 +59,12 @@ export const Documents: React.FC = () => {
             <Card key={document.id} className="p-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="rounded-xl bg-teal-50 p-3 shrink-0">
-                    <FileText className="h-5 w-5 text-teal-700" />
+                  <div className="rounded-xl bg-surface-container p-3 shrink-0">
+                    <span className="material-symbols-outlined text-primary-container">description</span>
                   </div>
                   <div className="min-w-0">
-                    <h2 className="font-bold text-slate-900 truncate">{document.name}</h2>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <h2 className="font-bold text-primary truncate">{document.name}</h2>
+                    <p className="text-sm text-outline mt-1">
                       {document.uploadedAt ? new Date(document.uploadedAt).toLocaleDateString() : 'Uploaded'}
                       {document.assetId ? ' • Linked to an asset' : ' • Awaiting asset link'}
                     </p>
@@ -76,7 +75,7 @@ export const Documents: React.FC = () => {
                 </Button>
               </div>
               {explanation?.id === document.id && (
-                <div className="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 space-y-2">
+                <div className="mt-5 rounded-xl bg-background p-4 text-sm text-primary space-y-2">
                   <p><strong>What it is:</strong> {explanation.data.what_it_is}</p>
                   <p><strong>What we found:</strong> {explanation.data.what_we_found.join(', ')}</p>
                   <p><strong>What is missing:</strong> {explanation.data.what_is_missing}</p>
