@@ -2,18 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-<<<<<<< HEAD
-import { getEstate } from '../services/api';
-import { EstateData } from '../types/estate';
-
-export const Closure: React.FC = () => {
-  const navigate = useNavigate();
-  const [estate, setEstate] = useState<EstateData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getEstate().then(data => {
-=======
 import { cancelEstateDeletion, closeEstate, deleteEstateNow, getClosureState, rescheduleEstateDeletion, scheduleEstateDeletion, ClosureState } from '../services/api';
 
 export const Closure: React.FC = () => {
@@ -32,7 +20,6 @@ export const Closure: React.FC = () => {
 
   useEffect(() => {
     getClosureState().then(data => {
->>>>>>> chondu
       setEstate(data);
       setLoading(false);
     });
@@ -42,9 +29,6 @@ export const Closure: React.FC = () => {
     return <div className="p-8 text-center text-slate-500">Loading...</div>;
   }
 
-<<<<<<< HEAD
-  const isReady = estate?.completionPercentage === 100;
-=======
   const isReady = estate?.ready === true;
 
   const handleClose = async () => {
@@ -100,7 +84,6 @@ export const Closure: React.FC = () => {
       setDeletionBusy(false);
     }
   };
->>>>>>> chondu
 
   return (
     <div className="max-w-2xl mx-auto pt-8 text-center">
@@ -112,13 +95,6 @@ export const Closure: React.FC = () => {
         <p className="text-lg text-slate-600 mb-8">
           {isReady 
             ? "You have completed all necessary actions to settle this estate." 
-<<<<<<< HEAD
-            : "Complete the required actions before closing this estate."}
-        </p>
-
-        {isReady ? (
-          <Button className="w-full">Close estate</Button>
-=======
             : `Complete ${estate?.pending_actions || 0} actions and ${estate?.pending_documents || 0} required documents before closing this estate.`}
         </p>
         {error && <p className="mb-6 text-sm text-red-600">{error}</p>}
@@ -127,15 +103,12 @@ export const Closure: React.FC = () => {
           <Button className="w-full" onClick={handleClose} disabled={closing || estate?.status === 'closed'}>
             {estate?.status === 'closed' ? 'Estate closed' : closing ? 'Closing estate...' : 'Close estate'}
           </Button>
->>>>>>> chondu
         ) : (
           <Button variant="secondary" className="w-full" onClick={() => navigate('/actions')}>
             View pending actions
           </Button>
         )}
       </Card>
-<<<<<<< HEAD
-=======
 
       <Card className="p-8 mt-8 text-left border-amber-200">
         <h2 className="text-xl font-bold text-slate-900">Delete estate data</h2>
@@ -156,7 +129,6 @@ export const Closure: React.FC = () => {
           {estate?.schedule?.status === 'scheduled' && <p className="text-sm text-amber-700">Scheduled for {new Date(estate.schedule.scheduled_for).toLocaleString()}.</p>}
         </div>
       </Card>
->>>>>>> chondu
     </div>
   );
 };

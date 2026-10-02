@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-=======
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
->>>>>>> chondu
 import { Layout } from './components/Layout';
 import { Welcome } from './pages/Welcome';
 import { Upload } from './pages/Upload';
@@ -12,8 +8,6 @@ import { Assets } from './pages/Assets';
 import { AssetDetail } from './pages/AssetDetail';
 import { Actions } from './pages/Actions';
 import { Closure } from './pages/Closure';
-<<<<<<< HEAD
-=======
 import { Documents } from './pages/Documents';
 import Login from './pages/login';
 import EstateSetup from './pages/estate-setup';
@@ -44,25 +38,11 @@ const RootRedirect = () => {
   if (!estateId) return <Navigate to="/estate-setup" replace />;
   return <Navigate to="/home" replace />; // Or Welcome, but requirements say /home or /upload
 };
->>>>>>> chondu
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-<<<<<<< HEAD
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Welcome />} />
-          <Route path="upload" element={<Upload />} />
-          <Route path="processing" element={<Processing />} />
-          <Route path="home" element={<Home />} />
-          <Route path="assets" element={<Assets />} />
-          <Route path="assets/:id" element={<AssetDetail />} />
-          <Route path="actions" element={<Actions />} />
-          <Route path="closure" element={<Closure />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-=======
         <Route path="/login" element={<Login />} />
         
         <Route element={<ProtectedRoute />}>
@@ -85,7 +65,6 @@ function App() {
         </Route>
         
         <Route path="*" element={<Navigate to="/" replace />} />
->>>>>>> chondu
       </Routes>
     </BrowserRouter>
   );
