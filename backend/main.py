@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import documents, classification, estates
+from routers import documents, classification, estates, chat
 
 app = FastAPI(title="EstateClear API", version="1.0.0")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 app.include_router(documents.router)
 app.include_router(classification.router)
 app.include_router(estates.router)
+app.include_router(chat.router)
 
 @app.get("/")
 def read_root():

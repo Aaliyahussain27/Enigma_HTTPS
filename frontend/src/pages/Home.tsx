@@ -6,6 +6,7 @@ import { Progress } from '../components/Progress';
 import { FileUp, Plus } from 'lucide-react';
 import { getEstate, getAssets, getActions, getDocuments } from '../services/api';
 import { EstateData, Asset, ActionItem, DocumentItem } from '../types/estate';
+import { ChatWidget } from '../components/ChatWidget';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -74,6 +75,7 @@ export const Home: React.FC = () => {
             </Button>
           </div>
         </Card>
+        <ChatWidget estateId={estate?.id || '123e4567-e89b-12d3-a456-426614174000'} />
       </div>
     );
   }
@@ -152,6 +154,7 @@ export const Home: React.FC = () => {
           </div>
         )}
       </div>
+      <ChatWidget estateId={estate?.id || '123e4567-e89b-12d3-a456-426614174000'} />
     </div>
   );
 };
