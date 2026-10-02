@@ -1,9 +1,20 @@
 import os
+from pathlib import Path
+
 import bcrypt
+from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 
-SECRET_KEY = os.getenv("SECRET_KEY", "super_secret_key_for_estateclear_dev")
+base_dir = Path(__file__).resolve().parents[1]
+load_dotenv(base_dir / ".env", override=False)
+load_dotenv(base_dir / "venv" / ".env", override=False)
+
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET is not set. Add it to backend/.env or backend/venv/.env")
+
+SECRET_KEY = JWT_SECRET
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7

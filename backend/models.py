@@ -78,3 +78,32 @@ class RequiredDocument(Base):
     is_satisfied = Column(String, default="false")
     satisfied_by_document_id = Column(UUID(as_uuid=True), ForeignKey("documents.id"), nullable=True)
 
+
+class ClosureSchedule(Base):
+    __tablename__ = "closure_schedules"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()"))
+    estate_id = Column(UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE"), unique=True, nullable=False)
+    requested_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    scheduled_for = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String, default="scheduled", nullable=False)
+    deletion_reason = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    executed_at = Column(DateTime(timezone=True), nullable=True)
+    cancelled_at = Column(DateTime(timezone=True), nullable=True)
+
+
+class Tombstone(Base):
+    __tablename__ = "tombstones"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()"))
+    estate_id_hash = Column(String, nullable=False, index=True)
+    deletion_job_id = Column(String, nullable=False, unique=True)
+    deletion_reason = Column(String, nullable=True)
+    documents_deleted = Column(String, default="0")
+    required_documents_deleted = Column(String, default="0")
+    assets_deleted = Column(String, default="0")
+    members_deleted = Column(String, default="0")
+    deleted_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+

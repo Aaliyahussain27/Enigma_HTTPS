@@ -4,7 +4,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Status } from '../components/Status';
 import { ArrowLeft, Check, Circle } from 'lucide-react';
-import { getAssetById, updateActionStatus, completeRequirement } from '../services/api';
+import { explainDocument, getAssetById, updateActionStatus, completeRequirement, uploadDocument, DocumentExplanation } from '../services/api';
 import { Asset } from '../types/estate';
 
 export const AssetDetail: React.FC = () => {
@@ -12,6 +12,9 @@ export const AssetDetail: React.FC = () => {
   const navigate = useNavigate();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
+  const [explanation, setExplanation] = useState<{ id: string; data: DocumentExplanation } | null>(null);
+  const [explaining, setExplaining] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -52,6 +55,17 @@ export const AssetDetail: React.FC = () => {
       ...asset,
       requirements: asset.requirements.map(r => r.id === reqId ? { ...r, completed: !currentStatus } : r)
     });
+  };
+
+  const handleExplain = async (documentId: string) => {
+    setExplaining(documentId);
+    try {
+      setExplanation({ id: documentId, data: await explainDocument(documentId) });
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Unable to explain this document.');
+    } finally {
+      setExplaining(null);
+    }
   };
 
   return (
@@ -113,12 +127,24 @@ export const AssetDetail: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-900 mb-4">Documents</h2>
           <Card className="divide-y divide-slate-100">
             {asset.documents.length > 0 ? asset.documents.map(doc => (
-              <div key={doc.id} className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-teal-600" />
-                  <span className="font-medium text-slate-900">{doc.name}</span>
+              <div key={doc.id} className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Check className="w-5 h-5 text-teal-600 shrink-0" />
+                    <span className="font-medium text-slate-900 truncate">{doc.name}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => handleExplain(doc.id)} disabled={explaining === doc.id}>
+                    {explaining === doc.id ? 'Explaining...' : 'Explain'}
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm">View</Button>
+                {explanation?.id === doc.id && (
+                  <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 space-y-2">
+                    <p><strong>What it is:</strong> {explanation.data.what_it_is}</p>
+                    <p><strong>What we found:</strong> {explanation.data.what_we_found.join(', ')}</p>
+                    <p><strong>What is missing:</strong> {explanation.data.what_is_missing}</p>
+                    <p><strong>Next steps:</strong> {explanation.data.next_steps}</p>
+                  </div>
+                )}
               </div>
             )) : (
               <div className="p-4 text-slate-500">No documents found for this asset.</div>
@@ -133,18 +159,12 @@ export const AssetDetail: React.FC = () => {
                     const file = e.target.files?.[0];
                     if (file) {
                       try {
-                        // We can reuse the uploadDocument API function, but since it's an MVP,
-                        // we'll just simulate adding it to the local asset's document list for the UI.
-                        setAsset({
-                          ...asset,
-                          documents: [...asset.documents, { id: Math.random().toString(), name: file.name, status: 'Uploaded' }]
-                        });
-                        // Also hit the real endpoint in the background
-                        const { uploadDocument } = await import('../services/api');
                         await uploadDocument(file);
+                        const refreshedAsset = await getAssetById(asset.id);
+                        setAsset(refreshedAsset || asset);
+                        setUploadError('');
                       } catch (err) {
-                        console.error('Upload failed', err);
-                        alert('Upload failed. Possible duplicate document?');
+                        setUploadError(err instanceof Error ? err.message : 'Upload failed.');
                       }
                     }
                   }} 
@@ -158,6 +178,7 @@ export const AssetDetail: React.FC = () => {
                 </Button>
               </div>
             )}
+            {uploadError && <p className="px-4 pb-4 text-sm text-red-600">{uploadError}</p>}
           </Card>
         </section>
       </div>

@@ -26,4 +26,6 @@ export interface DocumentItem {
   id: string;
   name: string;
   status: 'Uploaded' | 'Missing';
+  assetId?: string;
+  uploadedAt?: string;
 }

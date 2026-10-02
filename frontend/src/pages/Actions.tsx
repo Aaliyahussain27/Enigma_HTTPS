@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Status } from '../components/Status';
-import { getActions } from '../services/api';
+import { getActions, updateActionStatus } from '../services/api';
 import { ActionItem } from '../types/estate';
 
 export const Actions: React.FC = () => {
   const navigate = useNavigate();
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
     getActions().then(data => {
@@ -17,6 +18,18 @@ export const Actions: React.FC = () => {
       setLoading(false);
     });
   }, []);
+
+  const advanceAction = async (action: ActionItem) => {
+    if (action.status === 'Done') return;
+    const nextStatus = action.status === 'Needs attention' ? 'In progress' : 'Done';
+    setUpdating(action.id);
+    try {
+      await updateActionStatus(action.id, nextStatus);
+      setActions(current => current.map(item => item.id === action.id ? { ...item, status: nextStatus } : item));
+    } finally {
+      setUpdating(null);
+    }
+  };
 
   if (loading) {
     return <div className="p-8 text-center text-slate-500">Loading...</div>;
@@ -57,9 +70,10 @@ export const Actions: React.FC = () => {
               </div>
               <Button 
                 variant="secondary" 
-                onClick={() => navigate(action.assetId ? `/assets/${action.assetId}` : '/')}
+                disabled={updating === action.id}
+                onClick={() => action.status === 'Done' ? navigate(action.assetId ? `/assets/${action.assetId}` : '/') : advanceAction(action)}
               >
-                {action.status === 'Done' ? 'View' : 'Continue'}
+                {action.status === 'Done' ? 'View' : updating === action.id ? 'Saving...' : action.status === 'Needs attention' ? 'Start' : 'Mark done'}
               </Button>
             </Card>
           ))}

@@ -1,14 +1,26 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from pathlib import Path
 
-# Fallback to a default postgres connection string if not provided in environment
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin1234@localhost/estateclear")
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+base_dir = Path(__file__).resolve().parent
+load_dotenv(base_dir / ".env", override=False)
+load_dotenv(base_dir / "venv" / ".env", override=False)
+
+# Default to SQLite for local development unless an env override is provided.
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./estateclear.db")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
 
 def get_db():
     db = SessionLocal()

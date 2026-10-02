@@ -8,6 +8,7 @@ import { Assets } from './pages/Assets';
 import { AssetDetail } from './pages/AssetDetail';
 import { Actions } from './pages/Actions';
 import { Closure } from './pages/Closure';
+import { Documents } from './pages/Documents';
 import Login from './pages/login';
 import EstateSetup from './pages/estate-setup';
 
@@ -56,6 +57,7 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/assets" element={<Assets />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
+              <Route path="/documents" element={<Documents />} />
               <Route path="/actions" element={<Actions />} />
               <Route path="/closure" element={<Closure />} />
             </Route>

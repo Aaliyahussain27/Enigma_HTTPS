@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Progress } from '../components/Progress';
-import { FileUp, Plus, Download } from 'lucide-react';
-import { getEstate, getAssets, getActions, getDocuments } from '../services/api';
+import { FileUp, Plus, Download, Send } from 'lucide-react';
+import { getEstate, getAssets, getActions, getDocuments, askEstateQuestion, downloadEstateReport } from '../services/api';
 import { EstateData, Asset, ActionItem, DocumentItem } from '../types/estate';
 
 export const Home: React.FC = () => {
@@ -14,6 +14,10 @@ export const Home: React.FC = () => {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [asking, setAsking] = useState(false);
+  const [questionError, setQuestionError] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -85,6 +89,21 @@ export const Home: React.FC = () => {
 
   const activeActions = actions.filter(a => a.status !== 'Done').slice(0, 3);
 
+  const handleAsk = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!question.trim()) return;
+    setAsking(true);
+    setQuestionError('');
+    try {
+      setAnswer(await askEstateQuestion(question.trim()));
+      setQuestion('');
+    } catch (error) {
+      setQuestionError(error instanceof Error ? error.message : 'Unable to answer right now.');
+    } finally {
+      setAsking(false);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -92,7 +111,7 @@ export const Home: React.FC = () => {
           <h1 className="text-3xl font-bold text-slate-900">
             {estate?.ownerName ? `${estate.ownerName}'s Estate` : "Your Estate"}
           </h1>
-          <Button variant="outline" className="gap-2 print:hidden" onClick={() => window.print()}>
+          <Button variant="outline" className="gap-2 print:hidden" onClick={() => downloadEstateReport()}>
             <Download className="w-4 h-4" />
             Download PDF
           </Button>
@@ -143,6 +162,28 @@ export const Home: React.FC = () => {
           )}
         </div>
       </div>
+
+      <Card className="p-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-slate-900">Ask about this estate</h2>
+          <p className="text-slate-600 mt-1">Get an explanation based on the documents and assets already recorded.</p>
+        </div>
+        <form onSubmit={handleAsk} className="flex gap-3">
+          <input
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder="Which assets still need attention?"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            disabled={asking}
+          />
+          <Button type="submit" disabled={asking || !question.trim()} className="gap-2">
+            <Send className="h-4 w-4" />
+            {asking ? 'Asking...' : 'Ask'}
+          </Button>
+        </form>
+        {questionError && <p className="mt-3 text-sm text-red-600">{questionError}</p>}
+        {answer && <p className="mt-4 rounded-xl bg-slate-50 p-4 leading-7 text-slate-700">{answer}</p>}
+      </Card>
 
       <div className="pt-8 border-t border-slate-200">
         {estate?.completionPercentage === 100 ? (

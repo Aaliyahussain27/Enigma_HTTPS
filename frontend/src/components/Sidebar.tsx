@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Briefcase, CheckSquare, HelpCircle } from 'lucide-react';
+import { Home, Briefcase, CheckSquare, FileText, HelpCircle } from 'lucide-react';
 import clsx from 'clsx';
 
 export const Sidebar: React.FC = () => {
@@ -8,6 +8,7 @@ export const Sidebar: React.FC = () => {
     { to: '/home', icon: Home, label: 'Home' },
     { to: '/assets', icon: Briefcase, label: 'Assets' },
     { to: '/actions', icon: CheckSquare, label: 'Actions' },
+    { to: '/documents', icon: FileText, label: 'Documents' },
   ];
 
   return (
