@@ -19,8 +19,6 @@ def _load_environment():
 
 _load_environment()
 
-# Initialize client using environment variable GEMINI_API_KEY
-# Best practice is to set it in .env and let the backend load it on startup.
 def get_gemini_client():
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:

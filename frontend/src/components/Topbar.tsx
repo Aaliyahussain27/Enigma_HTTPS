@@ -10,7 +10,6 @@ export const Topbar: React.FC = () => {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('current_estate_id');
 
-    // clear per-requirement flags
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
       if (key && key.startsWith('completed_req_')) {
@@ -33,7 +32,7 @@ export const Topbar: React.FC = () => {
       top: 0,
       zIndex: 10,
     }}>
-      {/* Logo */}
+
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
         <div style={{
           width: 36,
@@ -59,7 +58,6 @@ export const Topbar: React.FC = () => {
         </span>
       </Link>
 
-      {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button style={{
           padding: 8,

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 interface Category {
   id: string;
   label: string;
-  icon: string; // Material Symbol name
+  icon: string; 
   description: string;
   color: string;
   bg: string;

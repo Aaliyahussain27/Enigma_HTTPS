@@ -9,7 +9,6 @@ base_dir = Path(__file__).resolve().parent
 load_dotenv(base_dir / ".env", override=False)
 load_dotenv(base_dir / "venv" / ".env", override=False)
 
-# Default to SQLite for local development unless an env override is provided.
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./estateclear.db")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

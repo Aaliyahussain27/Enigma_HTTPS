@@ -100,7 +100,6 @@ def run_document_analysis(self, document_id: str) -> dict:
                     exc=exc,
                     countdown=10 * (2 ** self.request.retries),
                 )
-            # Non-transient – permanent failure
             logger.error("Permanent Gemini failure for document %s: %s", document_id, exc)
             _mark_failed(db, doc, str(exc))
             return {"status": "failed", "document_id": document_id, "error": str(exc)}
@@ -117,7 +116,6 @@ def run_document_analysis(self, document_id: str) -> dict:
         )
         str_val = str(amount_val) if amount_val is not None else None
 
-        # Create the primary Asset
         asset = Asset(
             estate_id=doc.estate_id,
             category=analysis.category,
@@ -133,11 +131,10 @@ def run_document_analysis(self, document_id: str) -> dict:
             next_step_text=analysis.summary,
         )
         db.add(asset)
-        db.flush()  # get asset.id before linking
+        db.flush() 
 
         doc.asset_id = asset.id
 
-        # Required documents checklist
         for req_doc_type in analysis.required_documents:
             db.add(RequiredDocument(
                 asset_id=asset.id,
@@ -145,7 +142,6 @@ def run_document_analysis(self, document_id: str) -> dict:
                 is_satisfied="false",
             ))
 
-        # Action items (stored as lightweight Asset rows, same pattern as before)
         for action in analysis.actions:
             db.add(Asset(
                 estate_id=doc.estate_id,
@@ -162,9 +158,6 @@ def run_document_analysis(self, document_id: str) -> dict:
         return {"status": "completed", "document_id": document_id, "asset_id": str(asset.id)}
 
     except Exception as exc:
-        # Safety net: if anything unexpected blows up after the Gemini call
-        # (e.g. a DB write error) we mark the document failed and re-raise
-        # so Celery logs the traceback.
         db.rollback()
         try:
             doc = _get_document(db, document_id)

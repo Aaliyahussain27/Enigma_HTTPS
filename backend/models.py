@@ -22,8 +22,8 @@ class Estate(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     owner_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
     deceased_name = Column(String, nullable=True)
-    pathway_used = Column(String, nullable=True) # 'asset_guide','asset_map','mixed'
-    status = Column(String, default="active") # 'active','closing','closed'
+    pathway_used = Column(String, nullable=True) 
+    status = Column(String, default="active")
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
@@ -33,7 +33,7 @@ class EstateMember(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     estate_id = Column(UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    role = Column(String, nullable=False) # 'owner','executor','lawyer','accountant','viewer'
+    role = Column(String, nullable=False) 
     invited_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     access_revoked_at = Column(DateTime(timezone=True), nullable=True)
 
@@ -48,7 +48,7 @@ class Asset(Base):
     category = Column(String, nullable=False)
     institution_name = Column(String, nullable=True)
     reference_number = Column(String, nullable=True)
-    estimated_value = Column(String, nullable=True) # or Numeric. Kept as string to avoid schema issues, will parse in python
+    estimated_value = Column(String, nullable=True) 
     urgency = Column(String, nullable=True)
     claim_deadline = Column(String, nullable=True)
     status = Column(String, default="discovered")
@@ -68,7 +68,7 @@ class Document(Base):
     mime_type = Column(String, nullable=True)
     size_bytes = Column(String, nullable=True)
     ocr_extracted_json = Column(String, nullable=True)
-    # Async processing lifecycle: processing -> completed | failed
+
     status = Column(String, default="processing", nullable=False)
     processing_error = Column(String, nullable=True)
     uploaded_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -116,7 +116,7 @@ class ChatMessage(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     estate_id = Column(UUID(as_uuid=True), ForeignKey("estates.id", ondelete="CASCADE"))
-    role = Column(String, nullable=False) # 'user' or 'assistant'
+    role = Column(String, nullable=False) 
     content = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 interface NavItem {
   to: string;
-  icon: string; // Material Symbol name
+  icon: string; 
   label: string;
 }
 
@@ -17,7 +17,6 @@ const navItems: NavItem[] = [
 export const Sidebar: React.FC = () => {
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside style={{
         display: 'none',
         flexDirection: 'column',
@@ -68,7 +67,6 @@ export const Sidebar: React.FC = () => {
           ))}
         </nav>
 
-        {/* Help */}
         <div style={{ padding: '12px', borderTop: '1px solid #eef0f2' }}>
           <button style={{
             display: 'flex',
@@ -91,7 +89,6 @@ export const Sidebar: React.FC = () => {
         </div>
       </aside>
 
-      {/* Mobile Bottom Nav */}
       <nav style={{
         position: 'fixed',
         bottom: 0,

@@ -22,7 +22,7 @@ def create_estate(estate_in: EstateCreate, db: Session = Depends(get_db), curren
             pathway_used=estate_in.pathway_used
         )
         db.add(new_estate)
-        db.flush() # flush to get the id without committing
+        db.flush() 
 
         new_member = EstateMember(
             estate_id=new_estate.id,
@@ -124,15 +124,12 @@ def get_estate_map(estate_id: UUID, db: Session = Depends(get_db), membership: E
             except ValueError:
                 pass
     
-    # Calculate actions and requirements
     action_items = [a for a in assets if a.category == 'action_item']
     pending_actions = len(action_items)
     
-    # Get all required documents
     req_docs = db.query(RequiredDocument).join(Asset).filter(Asset.estate_id == estate_id).all()
     missing_docs = len([r for r in req_docs if r.is_satisfied == 'false'])
     
-    # Mask account numbers and build asset details
     masked_assets = []
     for a in assets:
         ref = a.reference_number

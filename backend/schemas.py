@@ -3,7 +3,6 @@ from typing import Optional
 from uuid import UUID
 from datetime import datetime
 
-# --- Auth Schemas ---
 class UserCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
@@ -29,7 +28,6 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Estate Schemas ---
 class EstateCreate(BaseModel):
     deceased_name: str
     pathway_used: str
@@ -42,12 +40,11 @@ class EstateResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
-    role: Optional[str] = None # Added via logic in endpoint
+    role: Optional[str] = None 
 
     class Config:
         from_attributes = True
 
-# --- Member Schemas ---
 class EstateMemberCreate(BaseModel):
     email: EmailStr
     role: str
@@ -63,7 +60,6 @@ class EstateMemberResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Chat Schemas ---
 class ChatRequest(BaseModel):
     message: str
 

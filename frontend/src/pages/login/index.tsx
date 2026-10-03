@@ -27,7 +27,7 @@ export default function Login() {
           const data = await res.json();
           throw new Error(data.detail || 'Signup failed');
         }
-        // Auto login after signup
+
         setIsSignup(false);
         setError('Signup successful. Please log in.');
       } else {

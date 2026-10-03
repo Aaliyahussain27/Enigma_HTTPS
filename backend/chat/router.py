@@ -32,18 +32,14 @@ def get_chat_history(estate_id: UUID, db: Session = Depends(get_db), membership:
 
 @router.post("/{estate_id}/chat")
 async def send_chat_message(estate_id: UUID, req: ChatRequest, db: Session = Depends(get_db), membership: EstateMember = Depends(require_estate_access)):
-    # 1. Save user message to database
     user_msg = ChatMessage(estate_id=estate_id, role="user", content=req.message)
     db.add(user_msg)
     db.commit()
 
-    # 2. Get history to feed to Gemini
     history = db.query(ChatMessage).filter(ChatMessage.estate_id == estate_id).order_by(ChatMessage.created_at.asc()).all()
     
-    # 3. Format context
     context = format_estate_context(estate_id, db)
     
-    # 4. Prepare system prompt and messages
     system_prompt = f"""You are an empathetic estate processing assistant for EstateClear.
 Use the following estate context to answer questions:
 {context}
@@ -59,10 +55,6 @@ Respond in plain text (or markdown if appropriate) and stream the output. Do not
     
     async def event_stream():
         try:
-            # We use synchronous generator for generate_content_stream in threading/asyncio wrapper
-            # But the new google-genai supports asyncio/sync seamlessly if we just loop it.
-            # Usually we need to use a thread pool or run_in_executor for sync client,
-            # but let's try the stream wrapper provided by genai.
             response_stream = client.models.generate_content_stream(
                 model=model_name,
                 contents=gemini_history,
@@ -73,15 +65,11 @@ Respond in plain text (or markdown if appropriate) and stream the output. Do not
             for chunk in response_stream:
                 if chunk.text:
                     full_response += chunk.text
-                    # SSE format: data: {"chunk": "text"}
                     yield f"data: {json.dumps({'chunk': chunk.text})}\n\n"
-                    # Small sleep to yield to event loop if needed
                     await asyncio.sleep(0.01)
 
-            # End of stream event
             yield "data: [DONE]\n\n"
             
-            # Save assistant message to database synchronously
             with get_db() as db_session:
                 asst_msg = ChatMessage(estate_id=estate_id, role="assistant", content=full_response)
                 db_session.add(asst_msg)

@@ -151,7 +151,7 @@ export const getDocuments = async (): Promise<DocumentItem[]> => {
   return docs.map((doc: any) => ({
     id: doc.id,
     name: doc.name,
-    status: doc.status,           // pass through raw: processing | completed | failed
+    status: doc.status,           
     processing_error: doc.processing_error,
     assetId: doc.asset_id || undefined,
     uploadedAt: doc.uploaded_at || undefined

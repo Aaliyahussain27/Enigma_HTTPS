@@ -54,6 +54,5 @@ class RequireRole:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
         return membership
 
-# Convenience dependencies for other services
 require_owner = RequireRole(["owner"])
 require_estate_access = RequireRole(["owner", "executor", "lawyer", "accountant", "viewer"])

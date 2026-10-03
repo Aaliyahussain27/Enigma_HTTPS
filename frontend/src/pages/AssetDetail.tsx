@@ -41,10 +41,8 @@ export const AssetDetail: React.FC = () => {
   const formatCurrency = (amount: number) => `₹${(amount / 100000).toFixed(1)}L`;
 
   const handleContinue = async () => {
-    // Demo progression
     if (asset.status === 'Action needed') {
       await updateActionStatus(asset.id, 'In progress');
-      // Also update local state for fast UI
       setAsset({ ...asset, status: 'In progress' });
     }
   };

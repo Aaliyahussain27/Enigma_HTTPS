@@ -9,10 +9,10 @@ python-jose[cryptography]
 python-multipart
 python-dotenv
 bcrypt
-# Gemini SDK
+
 google-genai
-# Async task queue
+
 celery[redis]>=5.3
 redis>=5.0
-# MinIO client (Phase A: local disk; Phase B: swap to MinIO)
+
 minio>=7.2

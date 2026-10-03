@@ -49,7 +49,6 @@ export const Home: React.FC = () => {
     );
   }
 
-  // Calculate metrics
   const totalAssets = assets.reduce((sum, asset) => sum + asset.amount, 0);
   const pendingActions = actions.filter(a => a.status === 'Needs attention').length;
   let docsNeeded = 0;
@@ -87,8 +86,6 @@ export const Home: React.FC = () => {
       </div>
     );
   }
-
-  // Format currency
   const formatCurrency = (amount: number) => {
     return `₹${(amount / 100000).toFixed(1)}L`;
   };
