@@ -2,18 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-<<<<<<< HEAD
-import { getEstate } from '../services/api';
-import { EstateData } from '../types/estate';
-
-export const Closure: React.FC = () => {
-  const navigate = useNavigate();
-  const [estate, setEstate] = useState<EstateData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getEstate().then(data => {
-=======
 import { cancelEstateDeletion, closeEstate, deleteEstateNow, getClosureState, rescheduleEstateDeletion, scheduleEstateDeletion, ClosureState } from '../services/api';
 
 export const Closure: React.FC = () => {
@@ -32,19 +20,22 @@ export const Closure: React.FC = () => {
 
   useEffect(() => {
     getClosureState().then(data => {
->>>>>>> chondu
       setEstate(data);
       setLoading(false);
     });
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+    return (
+      <div style={{ padding: 48, textAlign: 'center', color: 'var(--color-outline)' }}>
+        <span className="material-symbols-outlined" style={{
+          fontSize: 20, animation: 'spin 1s linear infinite', display: 'inline-block', color: 'var(--color-primary)',
+        }}>progress_activity</span>
+        <p style={{ marginTop: 12, fontFamily: 'var(--font-body)' }}>Loading...</p>
+      </div>
+    );
   }
 
-<<<<<<< HEAD
-  const isReady = estate?.completionPercentage === 100;
-=======
   const isReady = estate?.ready === true;
 
   const handleClose = async () => {
@@ -100,63 +91,70 @@ export const Closure: React.FC = () => {
       setDeletionBusy(false);
     }
   };
->>>>>>> chondu
 
   return (
-    <div className="max-w-2xl mx-auto pt-8 text-center">
-      <h1 className="text-3xl font-bold text-slate-900 mb-4">
+    <div style={{ maxWidth: 600, margin: '0 auto', paddingTop: 32, textAlign: 'center' }}>
+      <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 32, fontWeight: 700, marginBottom: 16 }}>
         {isReady ? 'Estate ready to close' : 'Estate not ready to close'}
       </h1>
       
-      <Card className="p-8 mt-8">
-        <p className="text-lg text-slate-600 mb-8">
+      <Card style={{ padding: 32, marginTop: 32 }}>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 18, color: 'var(--color-outline)', marginBottom: 32 }}>
           {isReady 
             ? "You have completed all necessary actions to settle this estate." 
-<<<<<<< HEAD
-            : "Complete the required actions before closing this estate."}
-        </p>
-
-        {isReady ? (
-          <Button className="w-full">Close estate</Button>
-=======
             : `Complete ${estate?.pending_actions || 0} actions and ${estate?.pending_documents || 0} required documents before closing this estate.`}
         </p>
-        {error && <p className="mb-6 text-sm text-red-600">{error}</p>}
+        {error && <p style={{ marginBottom: 24, fontSize: 14, color: 'var(--color-error)' }}>{error}</p>}
 
         {isReady ? (
-          <Button className="w-full" onClick={handleClose} disabled={closing || estate?.status === 'closed'}>
+          <Button style={{ width: '100%', justifyContent: 'center' }} onClick={handleClose} disabled={closing || estate?.status === 'closed'}>
             {estate?.status === 'closed' ? 'Estate closed' : closing ? 'Closing estate...' : 'Close estate'}
           </Button>
->>>>>>> chondu
         ) : (
-          <Button variant="secondary" className="w-full" onClick={() => navigate('/actions')}>
+          <Button variant="secondary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/actions')}>
             View pending actions
           </Button>
         )}
       </Card>
-<<<<<<< HEAD
-=======
 
-      <Card className="p-8 mt-8 text-left border-amber-200">
-        <h2 className="text-xl font-bold text-slate-900">Delete estate data</h2>
-        <p className="text-slate-600 mt-2">This permanently removes the estate's documents, assets, requirements, and memberships. Type DELETE to confirm.</p>
-        <div className="mt-6 space-y-4">
-          <label className="block text-sm font-medium text-slate-700">
+      <Card style={{ padding: 32, marginTop: 32, textAlign: 'left', border: '1px solid #fcd34d' }}>
+        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Delete estate data</h2>
+        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginTop: 8 }}>This permanently removes the estate's documents, assets, requirements, and memberships. Type DELETE to confirm.</p>
+        <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <label style={{ display: 'block', fontSize: 14, fontWeight: 500, fontFamily: 'var(--font-body)' }}>
             Deletion date
-            <input type="date" min={scheduledFor} value={scheduledFor} onChange={event => setScheduledFor(event.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 p-3" disabled={deletionBusy} />
+            <input 
+              type="date" 
+              min={scheduledFor} 
+              value={scheduledFor} 
+              onChange={event => setScheduledFor(event.target.value)} 
+              disabled={deletionBusy} 
+              style={{ display: 'block', width: '100%', marginTop: 4, borderRadius: 'var(--radius-md)', border: '1.5px solid #dde3ea', padding: '12px', fontFamily: 'var(--font-body)' }}
+            />
           </label>
-          <input value={confirmText} onChange={event => setConfirmText(event.target.value)} placeholder="Type DELETE" className="block w-full rounded-xl border border-slate-200 p-3" disabled={deletionBusy} />
-          <div className="flex flex-wrap gap-3">
+          <input 
+            value={confirmText} 
+            onChange={event => setConfirmText(event.target.value)} 
+            placeholder="Type DELETE" 
+            disabled={deletionBusy} 
+            style={{ display: 'block', width: '100%', borderRadius: 'var(--radius-md)', border: '1.5px solid #dde3ea', padding: '12px', fontFamily: 'var(--font-body)' }}
+          />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
             <Button variant="outline" onClick={handleSchedule} disabled={deletionBusy || confirmText !== 'DELETE'}>
               {estate?.schedule ? 'Reschedule deletion' : 'Schedule deletion'}
             </Button>
-            {estate?.schedule?.status === 'scheduled' && <Button variant="secondary" onClick={handleCancelSchedule} disabled={deletionBusy}>Cancel schedule</Button>}
+            {estate?.schedule?.status === 'scheduled' && (
+              <Button variant="secondary" onClick={handleCancelSchedule} disabled={deletionBusy}>Cancel schedule</Button>
+            )}
             <Button variant="secondary" onClick={handleDeleteNow} disabled={deletionBusy || confirmText !== 'DELETE'}>Delete now</Button>
           </div>
-          {estate?.schedule?.status === 'scheduled' && <p className="text-sm text-amber-700">Scheduled for {new Date(estate.schedule.scheduled_for).toLocaleString()}.</p>}
+          {estate?.schedule?.status === 'scheduled' && (
+            <p style={{ fontSize: 14, color: '#b45309' }}>Scheduled for {new Date(estate.schedule.scheduled_for).toLocaleString()}.</p>
+          )}
         </div>
       </Card>
->>>>>>> chondu
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

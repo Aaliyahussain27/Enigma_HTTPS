@@ -25,7 +25,8 @@ export interface ActionItem {
 export interface DocumentItem {
   id: string;
   name: string;
-  status: 'Uploaded' | 'Missing';
+  status: 'Uploaded' | 'Missing' | 'processing' | 'completed' | 'failed';
   assetId?: string;
   uploadedAt?: string;
+  processing_error?: string;
 }

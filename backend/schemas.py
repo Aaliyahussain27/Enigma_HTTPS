@@ -62,3 +62,16 @@ class EstateMemberResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# --- Chat Schemas ---
+class ChatRequest(BaseModel):
+    message: str
+
+class ChatMessageResponse(BaseModel):
+    id: UUID
+    role: str
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

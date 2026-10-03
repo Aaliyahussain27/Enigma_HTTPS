@@ -1,0 +1,12 @@
+backend\__pycache__
+.venv\Scripts\activate
+backend\auth\__pycache__
+backend\.venv
+backend\.env
+.env
+backend\classification\__pycache__
+backend\estates\__pycache__
+backend\estates\migrations\__pycache__
+__pycache__
+backend\documents\__pycache__
+backend\tests\__pycache__

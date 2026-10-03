@@ -2,90 +2,54 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-<<<<<<< HEAD
-import { FileUp, Search } from 'lucide-react';
-
-export const Welcome: React.FC = () => {
-  const navigate = useNavigate();
-=======
-import { FileUp, Search, LogIn } from 'lucide-react';
 
 export const Welcome: React.FC = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('jwt');
->>>>>>> chondu
 
   return (
-    <div className="max-w-2xl mx-auto pt-12">
-      <h1 className="text-4xl font-bold text-slate-900 mb-4">
-<<<<<<< HEAD
-        Let's organize the estate.
-      </h1>
-      <p className="text-lg text-slate-600 mb-12">
-        Upload the documents you have. We'll help identify assets and show you what needs to be done.
-      </p>
-
-      <div className="grid sm:grid-cols-2 gap-6">
-        <Card 
-          hoverable 
-          onClick={() => navigate('/upload')}
-          className="p-8 flex flex-col items-center text-center group"
-        >
-          <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors">
-            <FileUp className="w-8 h-8 text-teal-700" />
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">I have documents</h2>
-          <p className="text-slate-600 mb-8">Start by uploading bank statements, policies, or claims.</p>
-          <Button className="w-full mt-auto">Upload documents</Button>
-        </Card>
-=======
+    <div style={{ maxWidth: 720, margin: '0 auto', paddingTop: 48 }}>
+      <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 32, fontWeight: 700, marginBottom: 16 }}>
         Welcome to EstateClear
       </h1>
-      <p className="text-lg text-slate-600 mb-12">
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 18, color: 'var(--color-outline)', marginBottom: 48 }}>
         Log in to organize your estate, or continue to view existing assets.
       </p>
 
-      <div className="grid sm:grid-cols-2 gap-6">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {!isLoggedIn ? (
           <Card 
-            hoverable 
-            onClick={() => navigate('/login')}
-            className="p-8 flex flex-col items-center text-center group"
+            style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer' }}
           >
-            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
-              <LogIn className="w-8 h-8 text-blue-700" />
+            <div style={{ width: 64, height: 64, background: '#eef0ff', borderRadius: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 32, color: 'var(--color-secondary)' }}>login</span>
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Login / Sign Up</h2>
-            <p className="text-slate-600 mb-8">Create an account or login to set up a new estate.</p>
-            <Button className="w-full mt-auto">Login</Button>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Login / Sign Up</h2>
+            <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginBottom: 32 }}>Create an account or login to set up a new estate.</p>
+            <Button onClick={() => navigate('/login')} style={{ width: '100%', justifyContent: 'center', marginTop: 'auto' }}>Login</Button>
           </Card>
         ) : (
           <Card 
-            hoverable 
-            onClick={() => navigate('/estate-setup')}
-            className="p-8 flex flex-col items-center text-center group"
+            style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer' }}
           >
-            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-teal-100 transition-colors">
-              <FileUp className="w-8 h-8 text-teal-700" />
+            <div style={{ width: 64, height: 64, background: 'var(--color-surface)', borderRadius: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 32, color: 'var(--color-primary)' }}>upload_file</span>
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">I have documents</h2>
-            <p className="text-slate-600 mb-8">Start by uploading bank statements, policies, or claims.</p>
-            <Button className="w-full mt-auto">Upload documents</Button>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>I have documents</h2>
+            <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginBottom: 32 }}>Start by uploading bank statements, policies, or claims.</p>
+            <Button onClick={() => navigate('/estate-setup')} style={{ width: '100%', justifyContent: 'center', marginTop: 'auto' }}>Upload documents</Button>
           </Card>
         )}
->>>>>>> chondu
 
         <Card 
-          hoverable 
-          onClick={() => navigate('/home')}
-          className="p-8 flex flex-col items-center text-center group"
+          style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer' }}
         >
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-slate-100 transition-colors">
-            <Search className="w-8 h-8 text-slate-700" />
+          <div style={{ width: 64, height: 64, background: 'var(--color-surface-low)', borderRadius: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 32, color: 'var(--color-outline)' }}>search</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">I want to explore assets</h2>
-          <p className="text-slate-600 mb-8">Go straight to the dashboard to see what's currently recorded.</p>
-          <Button variant="secondary" className="w-full mt-auto">Go to dashboard</Button>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>I want to explore assets</h2>
+          <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginBottom: 32 }}>Go straight to the dashboard to see what's currently recorded.</p>
+          <Button variant="secondary" onClick={() => navigate('/home')} style={{ width: '100%', justifyContent: 'center', marginTop: 'auto' }}>Go to dashboard</Button>
         </Card>
       </div>
     </div>

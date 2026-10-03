@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Progress } from '../components/Progress';
-import { FileUp, Plus, Download, Send } from 'lucide-react';
 import { getEstate, getAssets, getActions, getDocuments, askEstateQuestion, downloadEstateReport } from '../services/api';
 import { EstateData, Asset, ActionItem, DocumentItem } from '../types/estate';
 
@@ -40,14 +39,19 @@ export const Home: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+    return (
+      <div style={{ padding: 48, textAlign: 'center', color: 'var(--color-outline)' }}>
+        <span className="material-symbols-outlined" style={{
+          fontSize: 20, animation: 'spin 1s linear infinite', display: 'inline-block', color: 'var(--color-primary)',
+        }}>progress_activity</span>
+        <p style={{ marginTop: 12, fontFamily: 'var(--font-body)' }}>Loading...</p>
+      </div>
+    );
   }
 
   // Calculate metrics
   const totalAssets = assets.reduce((sum, asset) => sum + asset.amount, 0);
   const pendingActions = actions.filter(a => a.status === 'Needs attention').length;
-  // Let's assume documents missing means documents required by assets but not in documents list.
-  // For MVP, just hardcode based on mock data if present, but since it's empty, it will be 0.
   let docsNeeded = 0;
   assets.forEach(asset => {
     asset.requirements.forEach(req => {
@@ -59,21 +63,23 @@ export const Home: React.FC = () => {
 
   if (isEstateEmpty) {
     return (
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Your estate</h1>
-          <p className="text-xl text-slate-500 font-medium">Nothing added yet</p>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Your estate</h1>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 18, fontWeight: 500, color: 'var(--color-outline)' }}>Nothing added yet</p>
         </div>
 
-        <Card className="p-8 text-center bg-slate-50 border-dashed border-2">
-          <p className="text-slate-600 mb-6 text-lg">Upload your documents or add an asset to get started.</p>
-          <div className="flex justify-center gap-4">
-            <Button onClick={() => navigate('/upload')} className="gap-2">
-              <FileUp className="w-5 h-5" />
+        <Card style={{ textAlign: 'center', border: '2px dashed #dde3ea', padding: 48, background: 'var(--color-surface-low)' }}>
+          <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginBottom: 24, fontSize: 16 }}>
+            Upload your documents or add an asset to get started.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+            <Button onClick={() => navigate('/upload')}>
+              <span className="material-symbols-outlined sm">upload_file</span>
               Upload documents
             </Button>
-            <Button variant="outline" className="gap-2">
-              <Plus className="w-5 h-5" />
+            <Button variant="outline">
+              <span className="material-symbols-outlined sm">add</span>
               Add an asset
             </Button>
           </div>
@@ -84,7 +90,7 @@ export const Home: React.FC = () => {
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return `₹${(amount / 100000).toFixed(1)}L`; // simple format for MVP
+    return `₹${(amount / 100000).toFixed(1)}L`;
   };
 
   const activeActions = actions.filter(a => a.status !== 'Done').slice(0, 3);
@@ -105,100 +111,135 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div>
-        <div className="flex justify-between items-start mb-2">
-          <h1 className="text-3xl font-bold text-slate-900">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 28, fontWeight: 700 }}>
             {estate?.ownerName ? `${estate.ownerName}'s Estate` : "Your Estate"}
           </h1>
-          <Button variant="outline" className="gap-2 print:hidden" onClick={() => downloadEstateReport()}>
-            <Download className="w-4 h-4" />
+          <Button variant="outline" onClick={() => downloadEstateReport()}>
+            <span className="material-symbols-outlined sm">download</span>
             Download PDF
           </Button>
         </div>
-        <div className="flex items-center gap-4 mb-8">
-          <span className="text-2xl font-bold text-teal-700">{estate?.completionPercentage}% organized</span>
-          <div className="flex-1 max-w-xs">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+          <span style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>
+            {estate?.completionPercentage}% organized
+          </span>
+          <div style={{ flex: 1, maxWidth: 240 }}>
             <Progress value={estate?.completionPercentage || 0} />
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="p-4 bg-slate-50">
-            <p className="text-sm text-slate-500 mb-1 font-medium">Assets found</p>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(totalAssets)}</p>
+        {/* Stats Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <Card style={{ background: 'var(--color-surface-low)' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500, color: 'var(--color-outline)', marginBottom: 4 }}>Assets found</p>
+            <p style={{ fontFamily: 'var(--font-heading)', fontSize: 24, fontWeight: 700 }}>{formatCurrency(totalAssets)}</p>
           </Card>
-          <Card className="p-4 bg-slate-50">
-            <p className="text-sm text-slate-500 mb-1 font-medium">Actions pending</p>
-            <p className="text-2xl font-bold text-slate-900">{pendingActions}</p>
+          <Card style={{ background: 'var(--color-surface-low)' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500, color: 'var(--color-outline)', marginBottom: 4 }}>Actions pending</p>
+            <p style={{ fontFamily: 'var(--font-heading)', fontSize: 24, fontWeight: 700 }}>{pendingActions}</p>
           </Card>
-          <Card className="p-4 bg-slate-50">
-            <p className="text-sm text-slate-500 mb-1 font-medium">Documents needed</p>
-            <p className="text-2xl font-bold text-slate-900">{docsNeeded}</p>
+          <Card style={{ background: 'var(--color-surface-low)' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500, color: 'var(--color-outline)', marginBottom: 4 }}>Documents needed</p>
+            <p style={{ fontFamily: 'var(--font-heading)', fontSize: 24, fontWeight: 700 }}>{docsNeeded}</p>
           </Card>
         </div>
       </div>
 
+      {/* What to do next */}
       <div>
-        <h2 className="text-xl font-bold text-slate-900 mb-4">What to do next</h2>
-        <div className="space-y-4">
+        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 16 }}>What to do next</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {activeActions.length > 0 ? activeActions.map(action => (
-            <Card key={action.id} className="p-5 flex items-center justify-between">
+            <Card key={action.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 className="font-bold text-slate-900 mb-1">{action.title}</h3>
-                <p className="text-slate-600">{action.description}</p>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, marginBottom: 4 }}>{action.title}</h3>
+                <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', fontSize: 14 }}>{action.description}</p>
               </div>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 onClick={() => navigate(action.assetId ? `/assets/${action.assetId}` : '/actions')}
               >
                 {action.status === 'Needs attention' ? 'Start action' : 'Continue'}
               </Button>
             </Card>
           )) : (
-            <Card className="p-8 text-center text-slate-500">
+            <Card style={{ textAlign: 'center', color: 'var(--color-outline)', padding: 32 }}>
               No pending actions right now.
             </Card>
           )}
         </div>
       </div>
 
-      <Card className="p-6">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-slate-900">Ask about this estate</h2>
-          <p className="text-slate-600 mt-1">Get an explanation based on the documents and assets already recorded.</p>
+      {/* Ask about estate */}
+      <Card style={{ padding: 24 }}>
+        <div style={{ marginBottom: 16 }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700 }}>Ask about this estate</h2>
+          <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginTop: 4, fontSize: 14 }}>
+            Get an explanation based on the documents and assets already recorded.
+          </p>
         </div>
-        <form onSubmit={handleAsk} className="flex gap-3">
+        <form onSubmit={handleAsk} style={{ display: 'flex', gap: 12 }}>
           <input
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder="Which assets still need attention?"
-            className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
             disabled={asking}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              borderRadius: 'var(--radius-md)',
+              border: '1.5px solid #dde3ea',
+              padding: '10px 16px',
+              fontFamily: 'var(--font-body)',
+              fontSize: 14,
+              outline: 'none',
+            }}
           />
-          <Button type="submit" disabled={asking || !question.trim()} className="gap-2">
-            <Send className="h-4 w-4" />
+          <Button type="submit" disabled={asking || !question.trim()}>
+            <span className="material-symbols-outlined sm">send</span>
             {asking ? 'Asking...' : 'Ask'}
           </Button>
         </form>
-        {questionError && <p className="mt-3 text-sm text-red-600">{questionError}</p>}
-        {answer && <p className="mt-4 rounded-xl bg-slate-50 p-4 leading-7 text-slate-700">{answer}</p>}
+        {questionError && <p style={{ marginTop: 12, fontSize: 13, color: 'var(--color-error)', fontFamily: 'var(--font-body)' }}>{questionError}</p>}
+        {answer && (
+          <p style={{
+            marginTop: 16,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-surface-low)',
+            padding: 16,
+            lineHeight: 1.7,
+            fontFamily: 'var(--font-body)',
+            fontSize: 14,
+            color: '#1a1c1e',
+          }}>
+            {answer}
+          </p>
+        )}
       </Card>
 
-      <div className="pt-8 border-t border-slate-200">
+      {/* Estate completion / closure */}
+      <div style={{ paddingTop: 32, borderTop: '1px solid #dde3ea' }}>
         {estate?.completionPercentage === 100 ? (
           <div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Estate ready to close</h2>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Estate ready to close</h2>
             <Button onClick={() => navigate('/closure')}>Close estate</Button>
           </div>
         ) : (
           <div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Estate completion</h2>
-            <p className="text-slate-600 mb-4">{pendingActions + docsNeeded} things are still pending.</p>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Estate completion</h2>
+            <p style={{ fontFamily: 'var(--font-body)', color: 'var(--color-outline)', marginBottom: 16 }}>
+              {pendingActions + docsNeeded} things are still pending.
+            </p>
             <Button variant="secondary" onClick={() => navigate('/closure')}>View pending items</Button>
           </div>
         )}
       </div>
+
+      {/* Keyframe for spinner */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

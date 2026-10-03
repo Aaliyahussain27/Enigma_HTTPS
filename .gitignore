@@ -1,3 +1,7 @@
 .venv
 backend\venv
 backend\routers\__init__.py
+*.db
+estateclear.db
+test.db
+backend\cache.db

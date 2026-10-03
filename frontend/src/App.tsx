@@ -1,20 +1,12 @@
-<<<<<<< HEAD
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-=======
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
->>>>>>> chondu
 import { Layout } from './components/Layout';
 import { Welcome } from './pages/Welcome';
-import { Upload } from './pages/Upload';
-import { Processing } from './pages/Processing';
 import { Home } from './pages/Home';
-import { Assets } from './pages/Assets';
 import { AssetDetail } from './pages/AssetDetail';
 import { Actions } from './pages/Actions';
 import { Closure } from './pages/Closure';
-<<<<<<< HEAD
-=======
 import { Documents } from './pages/Documents';
+import { CategoryBrowser } from './pages/CategoryBrowser';
 import Login from './pages/login';
 import EstateSetup from './pages/estate-setup';
 
@@ -27,65 +19,55 @@ const ProtectedRoute = () => {
   return <Outlet />;
 };
 
+import { ChatWidget } from './components/ChatWidget';
+
 const EstateSelectedRoute = () => {
   const estateId = localStorage.getItem('current_estate_id');
   const location = useLocation();
   if (!estateId) {
     return <Navigate to="/estate-setup" state={{ from: location }} replace />;
   }
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <ChatWidget />
+    </>
+  );
 };
 
-// Root route logic
 const RootRedirect = () => {
   const token = localStorage.getItem('jwt');
   if (!token) return <Navigate to="/login" replace />;
   const estateId = localStorage.getItem('current_estate_id');
   if (!estateId) return <Navigate to="/estate-setup" replace />;
-  return <Navigate to="/home" replace />; // Or Welcome, but requirements say /home or /upload
+  return <Navigate to="/home" replace />;
 };
->>>>>>> chondu
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-<<<<<<< HEAD
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Welcome />} />
-          <Route path="upload" element={<Upload />} />
-          <Route path="processing" element={<Processing />} />
-          <Route path="home" element={<Home />} />
-          <Route path="assets" element={<Assets />} />
-          <Route path="assets/:id" element={<AssetDetail />} />
-          <Route path="actions" element={<Actions />} />
-          <Route path="closure" element={<Closure />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-=======
         <Route path="/login" element={<Login />} />
-        
+
         <Route element={<ProtectedRoute />}>
           <Route path="/estate-setup" element={<EstateSetup />} />
-          
+
           <Route element={<EstateSelectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<RootRedirect />} />
               <Route path="/welcome" element={<Welcome />} />
-              <Route path="/upload" element={<Upload />} />
-              <Route path="/processing" element={<Processing />} />
+              {/* Category picker leads to upload */}
+              <Route path="/upload" element={<CategoryBrowser />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/assets" element={<Assets />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
-              <Route path="/documents" element={<Documents />} />
               <Route path="/actions" element={<Actions />} />
+              <Route path="/documents" element={<Documents />} />
               <Route path="/closure" element={<Closure />} />
             </Route>
           </Route>
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/" replace />} />
->>>>>>> chondu
       </Routes>
     </BrowserRouter>
   );

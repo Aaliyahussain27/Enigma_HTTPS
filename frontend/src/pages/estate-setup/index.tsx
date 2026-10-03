@@ -77,51 +77,72 @@ export default function EstateSetup() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Loading...</div>;
+  if (loading) return (
+    <div style={{ padding: 48, textAlign: 'center', color: 'var(--color-outline)' }}>
+      <span className="material-symbols-outlined" style={{
+        fontSize: 20, animation: 'spin 1s linear infinite', display: 'inline-block', color: 'var(--color-primary)'
+      }}>progress_activity</span>
+      <p style={{ marginTop: 12, fontFamily: 'var(--font-body)' }}>Loading estates...</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-lg">
-        <h1 className="text-3xl font-bold text-slate-900 mb-8 text-center">Select Your Estate</h1>
+    <div style={{ display: 'flex', minHeight: '80vh', alignItems: 'center', justifyContent: 'center', background: 'var(--color-background)', padding: 16 }}>
+      <div style={{ width: '100%', maxWidth: 512 }}>
+        <h1 style={{ fontSize: 32, fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1a1c1e', marginBottom: 32, textAlign: 'center' }}>
+          Select Your Estate
+        </h1>
         
         {!showCreate && (
-          <div className="space-y-4 mb-8">
-            <h2 className="text-lg font-medium text-slate-700">Existing Estates</h2>
+          <div style={{ marginBottom: 32, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <h2 style={{ fontSize: 18, fontFamily: 'var(--font-heading)', fontWeight: 500, color: 'var(--color-on-surface-variant)' }}>Existing Estates</h2>
             {estates.map(estate => (
-              <Card key={estate.id} className="p-5 flex items-center justify-between hover:border-teal-500 cursor-pointer transition-colors" onClick={() => selectEstate(estate.id)}>
+              <Card 
+                key={estate.id} 
+                hoverable 
+                onClick={() => selectEstate(estate.id)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 20, cursor: 'pointer' }}
+              >
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg">{estate.deceased_name || 'Unnamed Estate'}</h3>
-                  <p className="text-sm text-slate-500 capitalize">Role: {estate.role}</p>
+                  <h3 style={{ fontSize: 18, fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1a1c1e', margin: 0 }}>
+                    {estate.deceased_name || 'Unnamed Estate'}
+                  </h3>
+                  <p style={{ fontSize: 14, fontFamily: 'var(--font-body)', color: 'var(--color-outline)', margin: '4px 0 0 0', textTransform: 'capitalize' }}>
+                    Role: {estate.role}
+                  </p>
                 </div>
-                <div className="flex items-center text-teal-700 font-medium">
-                  Continue <ArrowRight className="w-5 h-5 ml-2" />
+                <div style={{ display: 'flex', alignItems: 'center', color: 'var(--color-primary)', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+                  Continue <ArrowRight size={20} style={{ marginLeft: 8 }} />
                 </div>
               </Card>
             ))}
             
-            <Button variant="outline" className="w-full mt-6 py-6 border-dashed" onClick={() => setShowCreate(true)}>
-              <Plus className="w-5 h-5 mr-2" /> Create New Estate
+            <Button variant="outline" onClick={() => setShowCreate(true)} style={{ width: '100%', marginTop: 24, padding: 24, borderStyle: 'dashed', justifyContent: 'center' }}>
+              <Plus size={20} style={{ marginRight: 8 }} /> Create New Estate
             </Button>
           </div>
         )}
 
         {showCreate && (
-          <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Create New Estate</h2>
+          <div style={{ background: 'var(--color-surface-lowest)', padding: 32, borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <h2 style={{ fontSize: 24, fontFamily: 'var(--font-heading)', fontWeight: 700, margin: 0 }}>Create New Estate</h2>
               {estates.length > 0 && (
-                <button type="button" onClick={() => setShowCreate(false)} className="text-sm text-slate-500 hover:text-slate-900">Cancel</button>
+                <button type="button" onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', fontSize: 14, fontFamily: 'var(--font-body)', color: 'var(--color-outline)', cursor: 'pointer' }}>Cancel</button>
               )}
             </div>
-            {error && <div className="mb-4 text-sm text-red-600 text-center">{error}</div>}
-            <form onSubmit={handleCreate} className="space-y-6">
+            
+            {error && <div style={{ marginBottom: 16, fontSize: 14, color: 'var(--color-error)', textAlign: 'center', background: '#fde8e8', padding: 10, borderRadius: 'var(--radius-sm)' }}>{error}</div>}
+            
+            <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Deceased Person's Name</label>
-                <input required type="text" value={deceasedName} onChange={(e) => setDeceasedName(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-teal-500 focus:ring-teal-500" placeholder="e.g. John Doe" />
+                <label style={{ display: 'block', fontSize: 14, fontFamily: 'var(--font-body)', fontWeight: 500, marginBottom: 8, color: 'var(--color-on-surface-variant)' }}>Deceased Person's Name</label>
+                <input required type="text" value={deceasedName} onChange={(e) => setDeceasedName(e.target.value)} placeholder="e.g. John Doe" style={{ display: 'block', width: '100%', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--color-border)', padding: '12px 14px', fontFamily: 'var(--font-body)', fontSize: 16 }} />
               </div>
-              <button type="submit" disabled={creating} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 transition-colors">
+              <Button type="submit" disabled={creating} style={{ width: '100%', padding: '14px', justifyContent: 'center', fontSize: 16 }}>
                 {creating ? 'Setting up...' : 'Create Estate'}
-              </button>
+              </Button>
             </form>
           </div>
         )}

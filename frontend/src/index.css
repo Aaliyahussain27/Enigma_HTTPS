@@ -1,0 +1,82 @@
+/* ============================================================
+   EstateClear Design System – index.css
+   ============================================================ */
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* ── Design Tokens ── */
+:root {
+  /* Brand */
+  --color-primary:             #005c55;
+  --color-primary-container:   #0f766e;
+  --color-on-primary:          #ffffff;
+  --color-secondary:           #4059aa;
+  --color-secondary-container: #8fa7fe;
+  --color-tertiary:            #863b00;
+
+  /* Surface */
+  --color-background:              #f9f9ff;
+  --color-surface-lowest:          #ffffff;
+  --color-surface-low:             #f0f3ff;
+  --color-surface:                 #e7eeff;
+
+  /* System */
+  --color-outline:  #6e7977;
+  --color-border:   #dde3ea;
+  --color-on-surface: #1a1c1e;
+  --color-on-surface-variant: #4a4e54;
+  --color-error:    #ba1a1a;
+
+  /* Typography scale */
+  --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: #1a1c1e;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #1a1c1e;
+}
+
+/* ── Material Symbols helper ── */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+.material-symbols-outlined.sm  { font-size: 18px; }
+.material-symbols-outlined.md  { font-size: 24px; }
+.material-symbols-outlined.lg  { font-size: 32px; }
+.material-symbols-outlined.xl  { font-size: 48px; }
+.material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }

@@ -1,32 +1,5 @@
 import { Asset, ActionItem, DocumentItem, EstateData } from '../types/estate';
 
-<<<<<<< HEAD
-// In-memory state as requested for MVP without mock data
-// Starting with empty data as instructed.
-let estateData: EstateData = {
-  ownerName: null, // "Rajesh Sharma"
-  completionPercentage: 0
-};
-let assets: Asset[] = [];
-let actions: ActionItem[] = [];
-let documents: DocumentItem[] = [];
-
-// Simulate network delay
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-
-export const getEstate = async (): Promise<EstateData> => {
-  await delay(300);
-  return { ...estateData };
-};
-
-export const getAssets = async (): Promise<Asset[]> => {
-  await delay(300);
-  return [...assets];
-};
-
-export const getAssetById = async (id: string): Promise<Asset | undefined> => {
-  await delay(300);
-=======
 const BASE_URL = 'http://localhost:8000';
 
 const getHeaders = () => ({
@@ -99,7 +72,7 @@ export const getEstate = async (): Promise<EstateData> => {
   const summary = data.summary || {};
   const totalTasks = Math.max(1, (summary.critical_tasks_remaining || 0) + (summary.documents_needed || 0) + (summary.assets_found || 0));
   const completionPercentage = Math.max(0, Math.min(100, Math.round((1 - ((summary.critical_tasks_remaining || 0) + (summary.documents_needed || 0)) / totalTasks) * 100)));
-  
+
   return {
     ownerName: data.deceased_name,
     completionPercentage: Number.isFinite(completionPercentage) ? completionPercentage : 0
@@ -109,26 +82,22 @@ export const getEstate = async (): Promise<EstateData> => {
 export const getAssets = async (): Promise<Asset[]> => {
   const data = await getEstateMap();
   if (!data || !data.assets) return [];
-  
+
   return data.assets
     .filter((a: any) => a.category !== 'action_item')
     .map((a: any) => {
       const uiStatus = a.status === 'in_progress' ? 'In progress' : a.status === 'done' ? 'Done' : 'Action needed';
-      // Map API requirements to UI requirements
       const apiReqs = a.requirements || [];
       const requirements = apiReqs.map((r: any) => ({
         id: r.id,
         name: r.doc_type,
         completed: r.is_satisfied
       }));
-
-      // Add default knowledge based on the document
       const knowledge = [
         `Category: ${a.category}`,
         `Institution: ${a.institution_name || 'Unknown'}`,
         `Identifier: ${a.reference_number || 'Unknown'}`
       ];
-
       return {
         id: a.id,
         category: a.category,
@@ -148,58 +117,13 @@ export const getAssets = async (): Promise<Asset[]> => {
 
 export const getAssetById = async (id: string): Promise<Asset | undefined> => {
   const assets = await getAssets();
->>>>>>> chondu
   return assets.find(a => a.id === id);
 };
 
 export const getActions = async (): Promise<ActionItem[]> => {
-<<<<<<< HEAD
-  await delay(300);
-  return [...actions];
-};
-
-export const getDocuments = async (): Promise<DocumentItem[]> => {
-  await delay(300);
-  return [...documents];
-};
-
-export const uploadDocument = async (file: File): Promise<void> => {
-  await delay(1500); // Simulate processing
-  const newDoc: DocumentItem = {
-    id: Math.random().toString(36).substring(2, 9),
-    name: file.name,
-    status: 'Uploaded'
-  };
-  documents.push(newDoc);
-};
-
-export const updateActionStatus = async (id: string, status: ActionItem['status']): Promise<void> => {
-  await delay(300);
-  const action = actions.find(a => a.id === id);
-  if (action) {
-    action.status = status;
-  }
-};
-
-export const completeRequirement = async (assetId: string, reqId: string): Promise<void> => {
-  await delay(300);
-  const asset = assets.find(a => a.id === assetId);
-  if (asset) {
-    const req = asset.requirements.find(r => r.id === reqId);
-    if (req) req.completed = true;
-  }
-};
-
-// Debug helper to reset state
-export const resetState = async (): Promise<void> => {
-  estateData = { ownerName: null, completionPercentage: 0 };
-  assets = [];
-  actions = [];
-  documents = [];
-=======
   const data = await getEstateMap();
   if (!data || !data.assets) return [];
-  
+
   const actions: ActionItem[] = [];
   data.assets.forEach((a: any) => {
     if (a.next_step_text) {
@@ -227,7 +151,8 @@ export const getDocuments = async (): Promise<DocumentItem[]> => {
   return docs.map((doc: any) => ({
     id: doc.id,
     name: doc.name,
-    status: doc.status === 'Uploaded' ? 'Uploaded' : 'Missing',
+    status: doc.status,           // pass through raw: processing | completed | failed
+    processing_error: doc.processing_error,
     assetId: doc.asset_id || undefined,
     uploadedAt: doc.uploaded_at || undefined
   }));
@@ -323,11 +248,11 @@ export const explainDocument = async (documentId: string): Promise<DocumentExpla
 
 export const uploadDocument = async (file: File): Promise<void> => {
   const eid = getEstateId();
-  if (!eid) throw new Error("No estate ID found");
-  
+  if (!eid) throw new Error('No estate ID found');
+
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const res = await fetch(`${BASE_URL}/estates/${eid}/documents`, {
     method: 'POST',
     headers: {
@@ -335,24 +260,20 @@ export const uploadDocument = async (file: File): Promise<void> => {
     },
     body: formData
   });
-  
+
   if (!res.ok) {
     const error = await res.json();
-    throw new Error(error.detail || "Upload failed");
+    throw new Error(error.detail || 'Upload failed');
   }
 };
 
 export const updateActionStatus = async (id: string, status: ActionItem['status']): Promise<void> => {
   const eid = getEstateId();
   if (!eid) return;
-
   const normalizedStatus = status === 'Needs attention' ? 'Action needed' : status === 'In progress' ? 'In progress' : 'Done';
   const res = await fetch(`${BASE_URL}/estates/${eid}/assets/${id}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getHeaders()
-    },
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
     body: JSON.stringify({ status: normalizedStatus })
   });
   if (!res.ok) throw new Error('Unable to update action status');
@@ -363,15 +284,11 @@ export const completeRequirement = async (assetId: string, reqId: string, status
   if (!eid) return;
   await fetch(`${BASE_URL}/estates/${eid}/assets/${assetId}/requirements/${reqId}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getHeaders()
-    },
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
     body: JSON.stringify({ is_satisfied: status })
   });
 };
 
 export const resetState = async (): Promise<void> => {
   localStorage.removeItem('current_estate_id');
->>>>>>> chondu
 };
