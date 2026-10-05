@@ -6,6 +6,105 @@ interface ChatMessage {
   content: string;
 }
 
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+const refreshAccessToken = async (): Promise<string | null> => {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return null;
+
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ refresh_token: refreshToken }),
+  });
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  localStorage.setItem('jwt', data.jwt);
+  return data.jwt;
+};
+
+const authorizedChatFetch = async (url: string, init: RequestInit = {}) => {
+  const request = (accessToken: string | null) => fetch(url, {
+    ...init,
+    headers: {
+      ...(init.headers || {}),
+      Authorization: `Bearer ${accessToken || localStorage.getItem('jwt') || ''}`,
+    },
+  });
+
+  let response = await request(localStorage.getItem('jwt'));
+  if (response.status === 401) {
+    const refreshedToken = await refreshAccessToken();
+    if (refreshedToken) response = await request(refreshedToken);
+  }
+  return response;
+};
+
+const renderInlineMarkdown = (text: string): React.ReactNode[] => {
+  const tokens = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+  return tokens.map((token, index) => {
+    if (token.startsWith('**') && token.endsWith('**')) {
+      return <strong key={index}>{token.slice(2, -2)}</strong>;
+    }
+    if (token.startsWith('`') && token.endsWith('`')) {
+      return (
+        <code key={index} style={{ background: '#e2e8f0', borderRadius: 4, padding: '1px 4px' }}>
+          {token.slice(1, -1)}
+        </code>
+      );
+    }
+    return <React.Fragment key={index}>{token}</React.Fragment>;
+  });
+};
+
+const MarkdownMessage: React.FC<{ content: string }> = ({ content }) => {
+  const lines = content.replace(/\r\n/g, '\n').split('\n');
+  const blocks: React.ReactNode[] = [];
+  let listItems: string[] = [];
+
+  const flushList = () => {
+    if (listItems.length === 0) return;
+    blocks.push(
+      <ul key={`list-${blocks.length}`} style={{ margin: '6px 0', paddingLeft: 20 }}>
+        {listItems.map((item, index) => <li key={index}>{renderInlineMarkdown(item)}</li>)}
+      </ul>
+    );
+    listItems = [];
+  };
+
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+    const listMatch = trimmed.match(/^(?:[-*]|\d+\.)\s+(.+)$/);
+    if (listMatch) {
+      listItems.push(listMatch[1]);
+      return;
+    }
+
+    flushList();
+    if (!trimmed) return;
+
+    const heading = trimmed.match(/^#{1,3}\s+(.+)$/);
+    if (heading) {
+      blocks.push(
+        <strong key={`heading-${index}`} style={{ display: 'block', marginTop: index ? 10 : 0, marginBottom: 4 }}>
+          {renderInlineMarkdown(heading[1])}
+        </strong>
+      );
+      return;
+    }
+
+    blocks.push(
+      <p key={`paragraph-${index}`} style={{ margin: '5px 0' }}>
+        {renderInlineMarkdown(trimmed)}
+      </p>
+    );
+  });
+
+  flushList();
+  return <div>{blocks}</div>;
+};
+
 export const ChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -22,9 +121,7 @@ export const ChatWidget: React.FC = () => {
 
   useEffect(() => {
     if (isOpen && estateId && messages.length === 0) {
-      fetch(`http://127.0.0.1:8000/estates/${estateId}/chat`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      authorizedChatFetch(`${API_BASE_URL}/estates/${estateId}/chat`)
       .then(res => res.json())
       .then(data => setMessages(data))
       .catch(err => console.error(err));
@@ -44,11 +141,10 @@ export const ChatWidget: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/estates/${estateId}/chat`, {
+      const response = await authorizedChatFetch(`${API_BASE_URL}/estates/${estateId}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ message: input })
       });
@@ -179,7 +275,11 @@ export const ChatWidget: React.FC = () => {
                 fontFamily: 'var(--font-body)',
                 fontSize: 14
               }}>
-                {msg.content}
+                {msg.role === 'assistant' ? (
+                  <MarkdownMessage content={msg.content} />
+                ) : (
+                  msg.content
+                )}
               </div>
             ))}
             {isLoading && (

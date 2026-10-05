@@ -2,11 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 import uuid
+from jose import JWTError, jwt
 
 from backend.database import get_db
 from backend.models import User
 from backend.schemas import UserCreate, UserResponse, UserLogin, Token
-from backend.auth.utils import get_password_hash, verify_password, create_access_token, create_refresh_token
+from backend.auth.utils import (
+    ALGORITHM,
+    SECRET_KEY,
+    get_password_hash,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -44,3 +52,26 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
     return {"jwt": access_token, "refresh_token": refresh_token}
+
+
+@router.post("/refresh", response_model=Token)
+def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise ValueError("Refresh token has no subject")
+    except (JWTError, ValueError, TypeError):
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    try:
+        user = db.query(User).filter(User.id == uuid.UUID(str(user_id))).first()
+    except ValueError:
+        user = None
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    return {
+        "jwt": create_access_token(data={"sub": str(user.id)}),
+        "refresh_token": refresh_token,
+    }

@@ -62,19 +62,25 @@ export const Actions: React.FC = () => {
         <h2 className="text-xl font-bold text-slate-900 mb-4">{title}</h2>
         <div className="space-y-4">
           {items.map(action => (
-            <Card key={action.id} className="p-5 flex items-center justify-between">
+            <Card key={action.id} className="p-5 flex items-center justify-between gap-6">
               <div>
                 <h3 className="font-bold text-slate-900 mb-1 text-lg">{action.title}</h3>
                 <p className="text-slate-600 mb-3">{action.description}</p>
                 <Status status={action.status} />
               </div>
-              <Button 
-                variant="secondary" 
-                disabled={updating === action.id}
-                onClick={() => action.status === 'Done' ? navigate(action.assetId ? `/assets/${action.assetId}` : '/') : advanceAction(action)}
-              >
-                {action.status === 'Done' ? 'View' : updating === action.id ? 'Saving...' : action.status === 'Needs attention' ? 'Start' : 'Mark done'}
-              </Button>
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate(action.assetId ? `/assets/${action.assetId}` : '/actions')}
+                >
+                  View more
+                </Button>
+                {action.status === 'In progress' && (
+                  <Button variant="primary" disabled={updating === action.id} onClick={() => advanceAction(action)}>
+                    {updating === action.id ? 'Saving...' : 'Finish'}
+                  </Button>
+                )}
+              </div>
             </Card>
           ))}
         </div>

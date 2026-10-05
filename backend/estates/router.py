@@ -10,6 +10,7 @@ from backend.database import get_db
 from backend.models import User, Estate, EstateMember, Asset, Document, RequiredDocument, ClosureSchedule, Tombstone
 from backend.schemas import EstateCreate, EstateResponse, EstateMemberCreate, EstateMemberResponse
 from backend.auth.dependencies import get_current_user, require_owner, require_estate_access
+from backend.classification.ask import explain_action_with_gemini
 
 router = APIRouter(prefix="/estates", tags=["estates"])
 
@@ -462,6 +463,35 @@ def update_asset_status(estate_id: UUID, asset_id: UUID, payload: AssetStatusUpd
     db.commit()
     db.refresh(asset)
     return {"id": str(asset.id), "status": asset.status}
+
+@router.get("/{estate_id}/assets/{asset_id}/explain")
+def explain_action(estate_id: UUID, asset_id: UUID, db: Session = Depends(get_db), membership: EstateMember = Depends(require_estate_access)):
+    asset = db.query(Asset).filter(
+        Asset.id == asset_id,
+        Asset.estate_id == estate_id,
+        Asset.category == "action_item",
+    ).first()
+    if not asset:
+        raise HTTPException(status_code=404, detail="Action not found")
+
+    requirements = [
+        requirement.doc_type
+        for requirement in db.query(RequiredDocument).filter(RequiredDocument.asset_id == asset.id).all()
+    ]
+    try:
+        explanation = explain_action_with_gemini(
+            asset.next_step_text or "Review the identified action",
+            asset.category,
+            asset.urgency,
+            requirements,
+        )
+        return explanation.model_dump()
+    except Exception as error:
+        message = str(error)
+        print(f"Action explanation failed: {message}")
+        status_code = 503 if any(marker in message.lower() for marker in ("503", "unavailable", "high demand", "rate limit", "429")) else 500
+        detail = "Gemini is temporarily unavailable. Please retry in a moment." if status_code == 503 else "We couldn't explain this action right now."
+        raise HTTPException(status_code=status_code, detail=detail)
 
 class AskRequest(BaseModel):
     question: str

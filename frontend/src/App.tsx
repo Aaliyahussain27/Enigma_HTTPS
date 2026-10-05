@@ -7,6 +7,7 @@ import { Actions } from './pages/Actions';
 import { Closure } from './pages/Closure';
 import { Documents } from './pages/Documents';
 import { CategoryBrowser } from './pages/CategoryBrowser';
+import { Upload } from './pages/Upload';
 import Login from './pages/login';
 import EstateSetup from './pages/estate-setup';
 
@@ -58,6 +59,8 @@ function App() {
               <Route path="/welcome" element={<Welcome />} />
               {/* Category picker leads to upload */}
               <Route path="/upload" element={<CategoryBrowser />} />
+              <Route path="/uploads" element={<CategoryBrowser />} />
+              <Route path="/upload/file" element={<Upload />} />
               <Route path="/home" element={<Home />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
               <Route path="/actions" element={<Actions />} />

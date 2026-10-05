@@ -22,6 +22,12 @@ export interface ActionItem {
   assetId?: string;
 }
 
+export interface ActionExplanation {
+  what_we_know: string[];
+  documents_needed: string[];
+  what_to_do: string;
+}
+
 export interface DocumentItem {
   id: string;
   name: string;
@@ -29,4 +35,5 @@ export interface DocumentItem {
   assetId?: string;
   uploadedAt?: string;
   processing_error?: string;
+  summary?: string;
 }

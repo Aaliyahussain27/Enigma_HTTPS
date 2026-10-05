@@ -75,7 +75,7 @@ export const CategoryBrowser: React.FC = () => {
 
   const handleContinue = () => {
     if (!selected) return;
-    navigate('/upload', { state: { category: selected } });
+    navigate('/upload/file', { state: { category: selected } });
   };
 
   return (

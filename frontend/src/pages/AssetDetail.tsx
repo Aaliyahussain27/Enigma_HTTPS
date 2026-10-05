@@ -4,8 +4,8 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Status } from '../components/Status';
 import { ArrowLeft, Check, Circle } from 'lucide-react';
-import { explainDocument, getAssetById, updateActionStatus, completeRequirement, uploadDocument, DocumentExplanation } from '../services/api';
-import { Asset } from '../types/estate';
+import { explainAction, explainDocument, getActionById, getAssetById, updateActionStatus, completeRequirement, uploadDocument, DocumentExplanation } from '../services/api';
+import { ActionExplanation, Asset } from '../types/estate';
 
 export const AssetDetail: React.FC = () => {
   const { id } = useParams();
@@ -13,13 +13,26 @@ export const AssetDetail: React.FC = () => {
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
   const [explanation, setExplanation] = useState<{ id: string; data: DocumentExplanation } | null>(null);
+  const [actionExplanation, setActionExplanation] = useState<ActionExplanation | null>(null);
+  const [explainingAction, setExplainingAction] = useState(false);
   const [explaining, setExplaining] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState('');
 
   useEffect(() => {
     if (id) {
-      getAssetById(id).then(data => {
+      Promise.all([getAssetById(id), getActionById(id)]).then(([assetData, actionData]) => {
+        const data = assetData || actionData;
         setAsset(data || null);
+        if (actionData) {
+          const cached = localStorage.getItem(`action-explanation:${actionData.id}`);
+          if (cached) {
+            try {
+              setActionExplanation(JSON.parse(cached) as ActionExplanation);
+            } catch {
+              localStorage.removeItem(`action-explanation:${actionData.id}`);
+            }
+          }
+        }
         setLoading(false);
       });
     }
@@ -44,6 +57,30 @@ export const AssetDetail: React.FC = () => {
     if (asset.status === 'Action needed') {
       await updateActionStatus(asset.id, 'In progress');
       setAsset({ ...asset, status: 'In progress' });
+    } else if (asset.status === 'In progress') {
+      await updateActionStatus(asset.id, 'Done');
+      setAsset({ ...asset, status: 'Done' });
+    }
+  };
+
+  const isAction = asset.category === 'action_item';
+
+  const handleExplainAction = async () => {
+    const cacheKey = `action-explanation:${asset.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      setActionExplanation(JSON.parse(cached) as ActionExplanation);
+      return;
+    }
+    setExplainingAction(true);
+    try {
+      const data = await explainAction(asset.id);
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      setActionExplanation(data);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Unable to explain this action.');
+    } finally {
+      setExplainingAction(false);
     }
   };
 
@@ -80,10 +117,37 @@ export const AssetDetail: React.FC = () => {
         <h1 className="text-4xl font-bold text-slate-900 mb-4">{asset.provider}</h1>
         <div className="flex items-center gap-4">
           <Status status={asset.status} />
-          <span className="text-xl font-bold text-slate-900">{formatCurrency(asset.amount)}</span>
+          {!isAction && <span className="text-xl font-bold text-slate-900">{formatCurrency(asset.amount)}</span>}
         </div>
       </div>
 
+      {isAction ? (
+        <section>
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Action guidance</h2>
+          <Card className="p-6">
+            {actionExplanation ? (
+              <div className="space-y-5 text-slate-700">
+                <div>
+                  <h3 className="font-bold text-slate-900 mb-2">What we know</h3>
+                  <ul className="list-disc pl-5 space-y-1">{actionExplanation.what_we_know.map((item, index) => <li key={index}>{item}</li>)}</ul>
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 mb-2">Documents needed</h3>
+                  <ul className="list-disc pl-5 space-y-1">{actionExplanation.documents_needed.map((item, index) => <li key={index}>{item}</li>)}</ul>
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 mb-2">What to do</h3>
+                  <p>{actionExplanation.what_to_do}</p>
+                </div>
+              </div>
+            ) : (
+              <Button onClick={handleExplainAction} disabled={explainingAction}>
+                {explainingAction ? 'Explaining...' : 'Explain'}
+              </Button>
+            )}
+          </Card>
+        </section>
+      ) : (
       <div className="space-y-8">
         <section>
           <h2 className="text-xl font-bold text-slate-900 mb-4">What we know</h2>
@@ -180,9 +244,12 @@ export const AssetDetail: React.FC = () => {
           </Card>
         </section>
       </div>
+      )}
 
       <div className="mt-12 flex gap-4">
-        <Button onClick={handleContinue} className="flex-1">Continue claim</Button>
+        <Button onClick={handleContinue} className="flex-1" disabled={asset.status === 'Done'}>
+          {asset.status === 'Action needed' ? 'Start' : asset.status === 'In progress' ? 'Finish task' : 'Task complete'}
+        </Button>
       </div>
     </div>
   );

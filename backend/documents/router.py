@@ -38,7 +38,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @router.post("/{estate_id}/documents", status_code=202)
 async def upload_document(
     estate_id: UUID,
-    file: UploadFile = File(...),
+    files: list[UploadFile] = File(..., alias="file"),
     db: Session = Depends(get_db),
     membership=Depends(require_estate_access),
 ):
@@ -46,46 +46,59 @@ async def upload_document(
     Accepts a file, persists it, queues Gemini OCR, and returns immediately.
     Poll GET /documents to observe the processing -> completed | failed transition.
     """
-    existing = db.query(Document).filter(
-        Document.estate_id == estate_id,
-        Document.file_name_original == file.filename,
-    ).first()
+    accepted = []
+    rejected = []
 
-    if existing:
-        if existing.status == "failed":
+    for file in files:
+        existing = db.query(Document).filter(
+            Document.estate_id == estate_id,
+            Document.file_name_original == file.filename,
+        ).first()
+
+        if existing and existing.status != "failed":
+            rejected.append({
+                "name": file.filename,
+                "reason": "A document with this filename already exists for this estate.",
+            })
+            continue
+
+        if existing:
             db.delete(existing)
-            db.commit()
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail="A document with this filename already exists for this estate.",
-            )
+            db.flush()
 
-    file_path = os.path.join(UPLOAD_DIR, f"{estate_id}_{file.filename}")
-    file_bytes = await file.read()
-    with open(file_path, "wb") as fh:
-        fh.write(file_bytes)
+        file_path = os.path.join(UPLOAD_DIR, f"{estate_id}_{file.filename}")
+        file_bytes = await file.read()
+        with open(file_path, "wb") as fh:
+            fh.write(file_bytes)
 
-    doc = Document(
-        estate_id=estate_id,
-        uploaded_by_user_id=membership.user_id,
-        s3_key=file_path,
-        file_name_original=file.filename,
-        mime_type=file.content_type,
-        size_bytes=str(len(file_bytes)),
-        status="processing",
-    )
-    db.add(doc)
+        doc = Document(
+            estate_id=estate_id,
+            uploaded_by_user_id=membership.user_id,
+            s3_key=file_path,
+            file_name_original=file.filename,
+            mime_type=file.content_type,
+            size_bytes=str(len(file_bytes)),
+            status="processing",
+        )
+        db.add(doc)
+        db.flush()
+        accepted.append({"id": str(doc.id), "name": file.filename})
+
+    if not accepted and rejected:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=rejected[0]["reason"])
+
     db.commit()
-    db.refresh(doc)
-    run_document_analysis.apply_async(
-        args=[str(doc.id)],
-        queue="documents",
-    )
+    for document in accepted:
+        run_document_analysis.apply_async(
+            args=[document["id"]],
+            queue="documents",
+        )
 
     return {
-        "message": "Document upload accepted. Analysis is running in the background.",
-        "document_id": str(doc.id),
+        "message": f"{len(accepted)} document(s) accepted. Analysis is running in the background.",
+        "documents": accepted,
+        "rejected": rejected,
         "status": "processing",
     }
 
@@ -116,7 +129,11 @@ def list_documents(
             "processing_error": doc.processing_error,  
             "asset_id": str(doc.asset_id) if doc.asset_id else None,
             "uploaded_at": doc.uploaded_at.isoformat() if doc.uploaded_at else None,
-            "summary": None,
+            "summary": (
+                json.loads(doc.ocr_extracted_json).get("summary")
+                if doc.ocr_extracted_json
+                else None
+            ),
         }
         for doc in documents
     ]

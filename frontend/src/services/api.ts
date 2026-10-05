@@ -1,4 +1,4 @@
-import { Asset, ActionItem, DocumentItem, EstateData } from '../types/estate';
+import { Asset, ActionExplanation, ActionItem, DocumentItem, EstateData } from '../types/estate';
 
 const BASE_URL = 'http://localhost:8000';
 
@@ -120,6 +120,33 @@ export const getAssetById = async (id: string): Promise<Asset | undefined> => {
   return assets.find(a => a.id === id);
 };
 
+export const getActionById = async (id: string): Promise<Asset | undefined> => {
+  const data = await getEstateMap();
+  const action = data?.assets?.find((a: any) => a.id === id && a.category === 'action_item');
+  if (!action) return undefined;
+  return {
+    id: action.id,
+    category: action.category,
+    provider: action.next_step_text || 'Action',
+    amount: 0,
+    status: action.status === 'in_progress' ? 'In progress' : action.status === 'done' ? 'Done' : 'Action needed',
+    knowledge: [
+      `Action: ${action.next_step_text || 'Review the identified action'}`,
+      `Urgency: ${action.urgency || 'Not specified'}`
+    ],
+    requirements: (action.requirements || []).map((r: any) => ({
+      id: r.id,
+      name: r.doc_type,
+      completed: r.is_satisfied
+    })),
+    documents: (action.documents || []).map((document: any) => ({
+      id: document.id,
+      name: document.name,
+      status: document.status === 'Uploaded' ? 'Uploaded' : 'Missing'
+    }))
+  };
+};
+
 export const getActions = async (): Promise<ActionItem[]> => {
   const data = await getEstateMap();
   if (!data || !data.assets) return [];
@@ -133,7 +160,7 @@ export const getActions = async (): Promise<ActionItem[]> => {
         title: a.next_step_text,
         description: a.category === 'action_item' ? 'Detected from documents' : `Related to ${a.institution_name}`,
         status: uiStatus,
-        assetId: a.category === 'action_item' ? undefined : a.id
+        assetId: a.id
       });
     }
   });
@@ -154,7 +181,8 @@ export const getDocuments = async (): Promise<DocumentItem[]> => {
     status: doc.status,           
     processing_error: doc.processing_error,
     assetId: doc.asset_id || undefined,
-    uploadedAt: doc.uploaded_at || undefined
+    uploadedAt: doc.uploaded_at || undefined,
+    summary: doc.summary || undefined
   }));
 };
 
@@ -246,12 +274,22 @@ export const explainDocument = async (documentId: string): Promise<DocumentExpla
   return data;
 };
 
-export const uploadDocument = async (file: File): Promise<void> => {
+export const explainAction = async (actionId: string): Promise<ActionExplanation> => {
+  const eid = getEstateId();
+  if (!eid) throw new Error('No estate ID found');
+  const res = await fetch(`${BASE_URL}/estates/${eid}/assets/${actionId}/explain`, { headers: getHeaders() });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'Unable to explain this action right now');
+  return data;
+};
+
+export const uploadDocument = async (files: File | File[]): Promise<void> => {
   const eid = getEstateId();
   if (!eid) throw new Error('No estate ID found');
 
   const formData = new FormData();
-  formData.append('file', file);
+  const selectedFiles = Array.isArray(files) ? files : [files];
+  selectedFiles.forEach(file => formData.append('file', file));
 
   const res = await fetch(`${BASE_URL}/estates/${eid}/documents`, {
     method: 'POST',

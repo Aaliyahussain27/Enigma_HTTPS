@@ -11,6 +11,7 @@ from backend.database import get_db
 from backend.models import User, EstateMember, Asset, ChatMessage
 from backend.auth.dependencies import require_estate_access
 from backend.classification.gemini import get_gemini_client
+from google.genai import types
 
 router = APIRouter(prefix="/estates", tags=["chat"])
 
@@ -44,22 +45,37 @@ async def send_chat_message(estate_id: UUID, req: ChatRequest, db: Session = Dep
 Use the following estate context to answer questions:
 {context}
 
-Respond in plain text (or markdown if appropriate) and stream the output. Do not hallucinate facts outside the context. If you don't know, say so politely."""
+Respond using concise Markdown that is easy to scan:
+- Start with a short direct answer.
+- Use a bold label or heading for each topic.
+- Use bullet points for assets, amounts, and next steps.
+- Leave a blank line between sections.
+Do not hallucinate facts outside the context. If you don't know, say so politely."""
 
-    gemini_history = []
-    for m in history:
-        gemini_history.append({"role": "user" if m.role == "user" else "model", "parts": [m.content]})
+    # The Gemini SDK expects typed Content/Part objects here. The current
+    # message is sent separately through Chat.send_message_stream().
+    gemini_history = [
+        types.Content(
+            role="user" if m.role == "user" else "model",
+            parts=[types.Part.from_text(text=m.content)],
+        )
+        for m in history[:-1]
+    ]
     
     client = get_gemini_client()
     model_name = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
     
     async def event_stream():
         try:
-            response_stream = client.models.generate_content_stream(
+            chat = client.chats.create(
                 model=model_name,
-                contents=gemini_history,
-                config={"system_instruction": system_prompt, "temperature": 0.2}
+                history=gemini_history,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    temperature=0.2,
+                ),
             )
+            response_stream = chat.send_message_stream(req.message)
             
             full_response = ""
             for chunk in response_stream:

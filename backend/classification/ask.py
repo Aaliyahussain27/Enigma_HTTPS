@@ -42,6 +42,32 @@ class DocumentExplanation(BaseModel):
     what_is_missing: str = Field(..., description="What we do not know yet")
     next_steps: str = Field(..., description="What you may need to do")
 
+class ActionExplanation(BaseModel):
+    what_we_know: list[str]
+    documents_needed: list[str]
+    what_to_do: str
+
+
+def _normalize_findings(findings: object) -> list[str]:
+    if not isinstance(findings, list):
+        findings = [findings]
+
+    normalized = []
+    for finding in findings:
+        if isinstance(finding, dict):
+            heading = finding.get("heading") or finding.get("title")
+            details = finding.get("details") or finding.get("description") or finding.get("text")
+            if heading and details:
+                normalized.append(f"{heading}: {details}")
+            elif heading or details:
+                normalized.append(str(heading or details))
+            else:
+                normalized.append(json.dumps(finding, ensure_ascii=False))
+        else:
+            normalized.append(str(finding))
+    return normalized
+
+
 def explain_document_with_gemini(extracted_json: str) -> DocumentExplanation:
     """
     Explains a previously processed document using its extracted JSON data.
@@ -57,7 +83,15 @@ def explain_document_with_gemini(extracted_json: str) -> DocumentExplanation:
     Data:
     {extracted_json}
     
-    Return a structured explanation. Distinguish clearly between facts and uncertainty.
+    Return ONLY valid JSON with exactly these fields:
+    {{
+      "what_it_is": "string",
+      "what_we_found": ["string", "string"],
+      "what_is_missing": "string",
+      "next_steps": "string"
+    }}
+    Each item in "what_we_found" must be a plain string, not an object.
+    Distinguish clearly between facts and uncertainty.
     """
     
     response = _generate_with_retries(client, model, prompt)
@@ -67,9 +101,34 @@ def explain_document_with_gemini(extracted_json: str) -> DocumentExplanation:
     payload.setdefault("what_we_found", payload.get("findings") or payload.get("facts") or [])
     payload.setdefault("what_is_missing", payload.get("missing") or "No additional missing information was identified.")
     payload.setdefault("next_steps", payload.get("next_step") or payload.get("recommendation") or "Review the identified actions and requirements.")
-    if not isinstance(payload["what_we_found"], list):
-        payload["what_we_found"] = [str(payload["what_we_found"])]
+    payload["what_we_found"] = _normalize_findings(payload["what_we_found"])
     return DocumentExplanation.model_validate(payload)
+
+def explain_action_with_gemini(action: str, category: str, urgency: str | None, requirements: list[str]) -> ActionExplanation:
+    client = get_gemini_client()
+    model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+    prompt = f"""
+    You are an estate processing assistant. Explain the following estate action in simple,
+    practical language. Use only the supplied facts; clearly label anything uncertain.
+
+    Action: {action}
+    Category: {category}
+    Urgency: {urgency or "Not specified"}
+    Known required documents: {requirements or ["No specific documents recorded"]}
+
+    Return ONLY valid JSON with exactly these fields:
+    {{
+      "what_we_know": ["plain factual statement"],
+      "documents_needed": ["document name"],
+      "what_to_do": "step-by-step practical guidance"
+    }}
+    """
+    response = _generate_with_retries(client, model, prompt)
+    payload = _parse_json_response(response.text)
+    payload.setdefault("what_we_know", [f"Action: {action}"])
+    payload.setdefault("documents_needed", requirements)
+    payload.setdefault("what_to_do", "Review the action details and gather the listed documents.")
+    return ActionExplanation.model_validate(payload)
 
 class EstateAnswer(BaseModel):
     answer: str = Field(..., description="The helpful, empathetic answer to the user's question based ONLY on the provided estate data.")

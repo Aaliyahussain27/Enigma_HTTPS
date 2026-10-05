@@ -19,6 +19,9 @@ export const Home: React.FC = () => {
   const [questionError, setQuestionError] = useState('');
 
   useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
     const loadData = async () => {
       try {
         const [est, asts, acts, docs] = await Promise.all([
@@ -27,15 +30,25 @@ export const Home: React.FC = () => {
           getActions(),
           getDocuments()
         ]);
+        if (!active) return;
         setEstate(est);
         setAssets(asts);
         setActions(acts);
         setDocuments(docs);
+
+        if (docs.some((document) => document.status === 'processing')) {
+          timer = setTimeout(loadData, 4000);
+        }
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
     loadData();
+
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   if (loading) {

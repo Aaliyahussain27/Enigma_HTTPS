@@ -41,7 +41,17 @@ celery_app.conf.update(
     task_routes={
         "backend.tasks.document_tasks.run_document_analysis": {"queue": "documents"},
     },
- 
+    # Keep document analysis on the queue consumed by the default worker.
+    # This also makes `celery -A backend.celery_app worker` process uploads
+    # without requiring the caller to remember `-Q documents`.
+    task_default_queue="documents",
+    task_default_exchange="documents",
+    task_default_routing_key="documents",
+    # billiard's prefork pool is unreliable on Windows and crashes when a
+    # task is received. Solo keeps the local worker stable on Windows.
+    worker_pool="solo" if os.name == "nt" else "prefork",
+    worker_concurrency=1 if os.name == "nt" else 4,
+
     task_acks_late=True,                  
     worker_prefetch_multiplier=1,         
     task_track_started=True,
